@@ -2,22 +2,9 @@
   "name": "abubeast",
   "version": "0.1.0",
   "private": true,
-  "overrides": {
-    "qrcode.react": {
-      "react": "$react"
-    },
-    "react-qr-reader": {
-      "react": "$react",
-      "react-dom": "$react-dom"
-    },
-    "use-sync-external-store": {
-      "react": "$react"
-    }
-  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "vercel-build": "npm install --legacy-peer-deps && npm run build",
     "start": "next start",
     "lint": "next lint"
   },
