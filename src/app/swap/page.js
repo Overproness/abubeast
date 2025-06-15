@@ -2,14 +2,28 @@
 
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useAuth } from "@/context/AuthContext";
-import { LiFiWidget as Widget } from "@lifi/widget";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function SwapPage() {
   const { user, walletInfo, isAuthenticated, authChecked } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const [Widget, setWidget] = useState(null);
   const router = useRouter();
+
+  useEffect(() => {
+    // Dynamic import of LiFi Widget to avoid SSR issues
+    const loadWidget = async () => {
+      try {
+        const { LiFiWidget } = await import("@lifi/widget");
+        setWidget(() => LiFiWidget);
+      } catch (error) {
+        console.error("Failed to load LiFi Widget:", error);
+      }
+    };
+
+    loadWidget();
+  }, []);
 
   useEffect(() => {
     // Check if user is authenticated after auth check is complete
@@ -33,7 +47,7 @@ export default function SwapPage() {
       },
       theme: {
         palette: {
-          primary: { main: "#3B82F6" }, // Match app's blue theme
+          primary: { main: "#3B82F6" },
           secondary: { main: "#10B981" },
         },
         shape: {
@@ -50,7 +64,6 @@ export default function SwapPage() {
       if (walletInfo.type === "phantom") {
         config.walletManagement = {
           connect: {
-            // Use already connected Phantom wallet
             evm: { provider: window.ethereum },
             solana: { provider: window.solana },
           },
@@ -80,7 +93,7 @@ export default function SwapPage() {
     return config;
   };
 
-  if (isLoading) {
+  if (isLoading || !Widget) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="large" />

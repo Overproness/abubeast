@@ -3,18 +3,12 @@ import Token from "@/models/Token";
 import TradeLog from "@/models/TradeLog";
 import TradeOrder from "@/models/TradeOrder";
 import TradingPermission from "@/models/TradingPermission";
-import { LiFi } from "@lifi/sdk";
 import { ethers } from "ethers";
 import { analyzeAndTradeNewTokens } from "../services/tokenAnalyzerService";
 import {
   executeTrade,
   getUserTradingSettings,
 } from "../services/tradingService";
-
-// Initialize LiFi SDK
-const lifi = new LiFi({
-  integrator: "AbuBeast",
-});
 
 /**
  * Main worker function to check for new tokens and execute automated trades

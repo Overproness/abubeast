@@ -1,24 +1,39 @@
-import { LiFi } from "@lifi/sdk";
-
-// Initialize LiFi SDK
+// Client-side only LiFi service
 let lifi;
 
 export function getLifi() {
+  // Only initialize on client-side
+  if (typeof window === "undefined") {
+    throw new Error("LiFi SDK can only be used on the client-side");
+  }
+
   if (!lifi) {
-    lifi = new LiFi({
-      integrator: "AbuBeast",
-    });
+    // Dynamic import to avoid server-side execution
+    import("@lifi/sdk")
+      .then(({ LiFi }) => {
+        lifi = new LiFi({
+          integrator: "AbuBeast",
+        });
+      })
+      .catch((error) => {
+        console.error("Failed to initialize LiFi SDK:", error);
+      });
   }
   return lifi;
 }
 
 /**
- * Get available chains from LiFi
+ * Get available chains from LiFi (client-side only)
  */
 export async function getAvailableChains() {
-  const lifi = getLifi();
+  if (typeof window === "undefined") {
+    return [];
+  }
+
   try {
-    const { chains } = await lifi.getChains();
+    const { LiFi } = await import("@lifi/sdk");
+    const lifiInstance = new LiFi({ integrator: "AbuBeast" });
+    const { chains } = await lifiInstance.getChains();
     return chains;
   } catch (error) {
     console.error("Error fetching available chains:", error);
@@ -27,13 +42,18 @@ export async function getAvailableChains() {
 }
 
 /**
- * Get available tokens for a specific chain
+ * Get available tokens for a specific chain (client-side only)
  * @param {string} chainId - Chain ID
  */
 export async function getAvailableTokens(chainId) {
-  const lifi = getLifi();
+  if (typeof window === "undefined") {
+    return [];
+  }
+
   try {
-    const { tokens } = await lifi.getTokens({ chains: [chainId] });
+    const { LiFi } = await import("@lifi/sdk");
+    const lifiInstance = new LiFi({ integrator: "AbuBeast" });
+    const { tokens } = await lifiInstance.getTokens({ chains: [chainId] });
     return tokens[chainId] || [];
   } catch (error) {
     console.error(`Error fetching tokens for chain ${chainId}:`, error);
@@ -42,13 +62,18 @@ export async function getAvailableTokens(chainId) {
 }
 
 /**
- * Get route for token swap
+ * Get route for token swap (client-side only)
  * @param {Object} params - Swap parameters
  */
 export async function getRoute(params) {
-  const lifi = getLifi();
+  if (typeof window === "undefined") {
+    throw new Error("Route calculation only available on client-side");
+  }
+
   try {
-    const route = await lifi.getRoutes(params);
+    const { LiFi } = await import("@lifi/sdk");
+    const lifiInstance = new LiFi({ integrator: "AbuBeast" });
+    const route = await lifiInstance.getRoutes(params);
     return route;
   } catch (error) {
     console.error("Error getting swap route:", error);
@@ -57,14 +82,19 @@ export async function getRoute(params) {
 }
 
 /**
- * Execute a token swap
+ * Execute a token swap (client-side only)
  * @param {Object} route - The route to execute
  * @param {Object} signer - The signer object
  */
 export async function executeSwap(route, signer) {
-  const lifi = getLifi();
+  if (typeof window === "undefined") {
+    throw new Error("Swap execution only available on client-side");
+  }
+
   try {
-    const result = await lifi.executeRoute(signer, route);
+    const { LiFi } = await import("@lifi/sdk");
+    const lifiInstance = new LiFi({ integrator: "AbuBeast" });
+    const result = await lifiInstance.executeRoute(signer, route);
     return result;
   } catch (error) {
     console.error("Error executing swap:", error);
@@ -73,14 +103,19 @@ export async function executeSwap(route, signer) {
 }
 
 /**
- * Get swap status
+ * Get swap status (client-side only)
  * @param {string} txHash - Transaction hash
  * @param {string} chainId - Chain ID
  */
 export async function getSwapStatus(txHash, chainId) {
-  const lifi = getLifi();
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   try {
-    const status = await lifi.getStatus({
+    const { LiFi } = await import("@lifi/sdk");
+    const lifiInstance = new LiFi({ integrator: "AbuBeast" });
+    const status = await lifiInstance.getStatus({
       txHash,
       chainId,
     });
