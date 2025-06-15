@@ -1,4 +1,4 @@
-import { LiFi } from "@lifi/sdk";
+import LiFi from "@lifi/sdk";
 import { Connection, Keypair, Transaction } from "@solana/web3.js";
 import bs58 from "bs58"; // For Solana keypair decoding
 import { ethers } from "ethers";

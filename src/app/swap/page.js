@@ -2,7 +2,7 @@
 
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useAuth } from "@/context/AuthContext";
-import { Widget } from "@lifi/widget";
+import { LiFiWidget as Widget } from "@lifi/widget";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 

@@ -1,3 +1,4 @@
+export const runtime = "nodejs"; // 'edge' is the default
 import { verifyToken } from "@/lib/auth/auth";
 import dbConnect from "@/lib/db/mongodb";
 import { analyzeAndTradeNewTokens } from "@/lib/services/tokenAnalyzerService";
