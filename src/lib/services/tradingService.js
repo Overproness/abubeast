@@ -1,4 +1,3 @@
-import { LiFi } from "@lifi/sdk";
 import { Connection, Keypair, Transaction } from "@solana/web3.js";
 import bs58 from "bs58"; // For Solana keypair decoding
 import { ethers } from "ethers";
@@ -6,11 +5,6 @@ import { ethers } from "ethers";
 /**
  * Service to handle automated trading operations
  */
-
-// Initialize LiFi instance
-const lifi = new LiFi({
-  integrator: "AbuBeast",
-});
 
 // Common ERC20 ABI for approvals
 const ERC20_ABI = [
@@ -187,6 +181,32 @@ function isTradeWithinLimits(tradeInfo, settings) {
 }
 
 /**
+ * Get best route for a trade using external routing service
+ */
+async function getBestRoute(routeRequest) {
+  try {
+    // Use a server-side routing service instead of LiFi SDK directly
+    const response = await fetch(`${process.env.INTERNAL_API_URL}/api/internal/get-route`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': process.env.INTERNAL_API_KEY,
+      },
+      body: JSON.stringify(routeRequest),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get route');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error getting route:', error);
+    throw error;
+  }
+}
+
+/**
  * Execute a trade on an EVM compatible chain
  */
 async function executeEVMTrade(tradeInfo, wallet, settings, permission) {
@@ -202,19 +222,14 @@ async function executeEVMTrade(tradeInfo, wallet, settings, permission) {
       slippage: settings.slippageTolerance || 0.5,
     };
 
-    // Get the best route
-    const routeResponse = await lifi.getRoutes(routeRequest);
+    // Get the best route using our internal service
+    const routeResponse = await getBestRoute(routeRequest);
 
     if (!routeResponse.routes || routeResponse.routes.length === 0) {
       throw new Error("No routes found for this trade");
     }
 
     const bestRoute = routeResponse.routes[0];
-
-    // Prepare transaction
-    const transactionRequest = await lifi.getStepTransaction(
-      bestRoute.steps[0]
-    );
 
     // Load backend signer key from environment or secure storage
     const provider = new ethers.JsonRpcProvider(
@@ -232,16 +247,15 @@ async function executeEVMTrade(tradeInfo, wallet, settings, permission) {
         tradeInfo.fromChainId,
         tradeInfo.fromTokenAddress,
         wallet.address,
-        transactionRequest.transactionRequest.to,
+        bestRoute.steps[0].estimate.approvalAddress,
         tradeInfo.amount,
         permission
       );
     }
 
-    // Execute the transaction
-    const tx = await backendSigner.sendTransaction(
-      transactionRequest.transactionRequest
-    );
+    // Execute the transaction using the route data
+    const txData = bestRoute.steps[0].transactionRequest;
+    const tx = await backendSigner.sendTransaction(txData);
     await tx.wait();
 
     // Log the transaction

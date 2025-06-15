@@ -1,7 +1,6 @@
 import dbConnect from "@/lib/db/mongodb";
 import User from "@/models/User";
 import { compare, hash } from "bcryptjs";
-import { sign, verify } from "jsonwebtoken";
 
 const JWT_SECRET =
   process.env.JWT_SECRET || "your-fallback-secret-never-use-in-production";
@@ -17,21 +16,25 @@ export async function comparePassword(password, hashedPassword) {
 }
 
 // Generate a JWT token for a user
-export function generateToken(user) {
-  const payload = {
-    id: user._id.toString(),
-    email: user.email,
-    // Don't include sensitive information in the token
-  };
+export async function signToken(payload) {
+  try {
+    const jwt = await import("jsonwebtoken");
 
-  return sign(payload, JWT_SECRET, { expiresIn: "7d" });
+    return jwt.default.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+  } catch (error) {
+    console.error("Token signing error:", error);
+    throw error;
+  }
 }
 
 // Enhanced token verification
 export async function verifyToken(token) {
   try {
     console.log("[Auth] Verifying token");
-    const decoded = verify(token, JWT_SECRET);
+    const jwt = await import("jsonwebtoken");
+    const decoded = jwt.default.verify(token, process.env.JWT_SECRET);
     console.log("[Auth] Token valid for user:", decoded.email);
 
     // Add a small delay to ensure everything is synchronized

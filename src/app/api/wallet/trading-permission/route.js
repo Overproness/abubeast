@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import { verifyToken } from "@/lib/auth/auth";
 import dbConnect from "@/lib/db/mongodb";
 import TradingPermission from "@/models/TradingPermission";

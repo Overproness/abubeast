@@ -1,4 +1,6 @@
-export const runtime = "nodejs"; // 'edge' is the default
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 import { verifyToken } from "@/lib/auth/auth";
 import dbConnect from "@/lib/db/mongodb";
 import { analyzeAndTradeNewTokens } from "@/lib/services/tokenAnalyzerService";
@@ -14,8 +16,8 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const tokenData = verifyToken(token);
-    if (!tokenData || !tokenData.userId || !tokenData.isAdmin) {
+    const tokenData = await verifyToken(token);
+    if (!tokenData || !tokenData.id || !tokenData.isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
