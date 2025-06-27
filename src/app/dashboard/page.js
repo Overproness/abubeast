@@ -11,13 +11,34 @@ export default function Dashboard() {
   const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [portfolioData, setPortfolioData] = useState({
+    totalValue: 0,
+    totalChange: 0,
+    totalChangePercent: 0,
+    topGainer: null,
+    topLoser: null,
+  });
+  const [tradingStats, setTradingStats] = useState({
+    totalTrades: 0,
+    successRate: 0,
+    avgReturn: 0,
+    dailyVolume: 0,
+  });
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [marketOverview, setMarketOverview] = useState({
+    btcPrice: 0,
+    ethPrice: 0,
+    totalMarketCap: 0,
+    fearGreedIndex: 50,
+  });
+
   const {
     user,
     isAuthenticated,
     authChecked,
     loading: authLoading,
-    forceAuthWithCookie, // We'll use this if available
-    walletInfo, // Add walletInfo from useAuth
+    forceAuthWithCookie,
+    walletInfo,
   } = useAuth();
   const [redirectAttempted, setRedirectAttempted] = useState(false);
   const router = useRouter();
@@ -66,7 +87,7 @@ export default function Dashboard() {
           if (!initialized.current) {
             console.log("[Dashboard] Initializing from header check");
             initialized.current = true;
-            fetchTokens();
+            initializeDashboard();
           }
         }
       } catch (err) {
@@ -104,7 +125,7 @@ export default function Dashboard() {
             "[Dashboard] Found token cookie, proceeding with dashboard initialization"
           );
           initialized.current = true;
-          fetchTokens();
+          initializeDashboard();
           return;
         }
 
@@ -125,12 +146,13 @@ export default function Dashboard() {
               userEmailRef.current || "authenticated user"
             );
             initialized.current = true;
-            fetchTokens();
+            initializeDashboard();
 
             // Set up refresh interval
             const intervalId = setInterval(() => {
               if (isMounted && document.visibilityState === "visible") {
                 fetchTokens();
+                fetchMarketData();
               }
             }, 60000);
 
@@ -171,7 +193,7 @@ export default function Dashboard() {
               "[Dashboard] Found token cookie despite auth check failure, proceeding anyway"
             );
             initialized.current = true;
-            fetchTokens();
+            initializeDashboard();
             return;
           }
         }
@@ -218,31 +240,122 @@ export default function Dashboard() {
     user,
   ]);
 
-  async function fetchTokens() {
+  // Initialize all dashboard data
+  async function initializeDashboard() {
     try {
       setLoading(true);
-      console.log("[Dashboard] Fetching tokens");
+      await Promise.all([
+        fetchTokens(),
+        fetchPortfolioData(),
+        fetchTradingStats(),
+        fetchRecentActivity(),
+        fetchMarketData(),
+      ]);
+    } catch (err) {
+      console.error("[Dashboard] Error initializing dashboard:", err);
+      setError("Failed to load dashboard data. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
+  async function fetchTokens() {
+    try {
+      console.log("[Dashboard] Fetching tokens");
       const response = await fetch("/api/tokens", {
-        credentials: "include", // Important for sending cookies
+        credentials: "include",
         cache: "no-store",
-        headers: {
-          "Cache-Control": "no-cache",
-        },
+        headers: { "Cache-Control": "no-cache" },
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch tokens");
-      }
-
+      if (!response.ok) throw new Error("Failed to fetch tokens");
       const data = await response.json();
       setTokens(data.tokens || []);
       console.log("[Dashboard] Tokens fetched:", data.tokens?.length || 0);
     } catch (err) {
       console.error("[Dashboard] Error fetching tokens:", err);
       setError("Failed to load tokens. Please try again later.");
-    } finally {
-      setLoading(false);
+    }
+  }
+
+  async function fetchPortfolioData() {
+    try {
+      // Simulate portfolio data
+      setPortfolioData({
+        totalValue: 125430.5,
+        totalChange: 8742.3,
+        totalChangePercent: 7.48,
+        topGainer: { symbol: "PEPE", change: 23.45 },
+        topLoser: { symbol: "DOGE", change: -12.32 },
+      });
+    } catch (err) {
+      console.error("Error fetching portfolio data:", err);
+    }
+  }
+
+  async function fetchTradingStats() {
+    try {
+      // Simulate trading stats
+      setTradingStats({
+        totalTrades: 247,
+        successRate: 78.5,
+        avgReturn: 12.3,
+        dailyVolume: 45230.75,
+      });
+    } catch (err) {
+      console.error("Error fetching trading stats:", err);
+    }
+  }
+
+  async function fetchRecentActivity() {
+    try {
+      // Simulate recent activity
+      setRecentActivity([
+        {
+          type: "buy",
+          token: "PEPE",
+          amount: 1000,
+          price: 0.00000123,
+          time: "2 minutes ago",
+        },
+        {
+          type: "sell",
+          token: "DOGE",
+          amount: 500,
+          price: 0.082,
+          time: "15 minutes ago",
+        },
+        {
+          type: "buy",
+          token: "SHIB",
+          amount: 2000000,
+          price: 0.000008,
+          time: "1 hour ago",
+        },
+        {
+          type: "sell",
+          token: "FLOKI",
+          amount: 750000,
+          price: 0.00003,
+          time: "2 hours ago",
+        },
+      ]);
+    } catch (err) {
+      console.error("Error fetching recent activity:", err);
+    }
+  }
+
+  async function fetchMarketData() {
+    try {
+      // Simulate market data
+      setMarketOverview({
+        btcPrice: 43250.75,
+        ethPrice: 2650.3,
+        totalMarketCap: 1.7e12,
+        fearGreedIndex: 72,
+      });
+    } catch (err) {
+      console.error("Error fetching market data:", err);
     }
   }
 
@@ -251,14 +364,10 @@ export default function Dashboard() {
       setLoading(true);
       const response = await fetch("/api/tokens/enrichment", {
         method: "POST",
-        credentials: "include", // Important for sending cookies
+        credentials: "include",
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to refresh token data");
-      }
-
-      // Fetch the updated tokens
+      if (!response.ok) throw new Error("Failed to refresh token data");
       await fetchTokens();
     } catch (err) {
       console.error("Error refreshing tokens:", err);
@@ -271,7 +380,7 @@ export default function Dashboard() {
   // Improved loading states
   if (authLoading && !userEmailRef.current && !authChecked) {
     return (
-      <div className="flex justify-center items-center h-screen flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50/80 via-white/60 to-purple-50/80 dark:from-gray-900/90 dark:via-slate-800/80 dark:to-purple-900/90 backdrop-blur-xl flex justify-center items-center flex-col">
         <LoadingSpinner size="large" />
         <span className="mt-3 text-gray-600 dark:text-gray-300">
           Checking authentication...
@@ -289,7 +398,7 @@ export default function Dashboard() {
   // Show more informative message if auth check completed but not initialized
   if (!initialized.current && authChecked) {
     return (
-      <div className="flex justify-center items-center h-screen flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50/80 via-white/60 to-purple-50/80 dark:from-gray-900/90 dark:via-slate-800/80 dark:to-purple-900/90 backdrop-blur-xl flex justify-center items-center flex-col">
         <LoadingSpinner size="large" />
         <span className="mt-3 text-gray-700 dark:text-gray-200">
           {isAuthenticated
@@ -308,177 +417,462 @@ export default function Dashboard() {
 
   // Render dashboard content as soon as we have a user, don't wait for token loading
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="md:flex md:items-center md:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Token Dashboard
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Track newly launched tokens in real-time
-          </p>
-          {userEmailRef.current && (
-            <p className="text-sm text-blue-500">
-              Logged in as: {userEmailRef.current}
-            </p>
-          )}
-        </div>
-        <div className="flex mt-4 md:mt-0 gap-4 items-center">
-          <WalletConnect />
-          <button
-            onClick={refreshTokenData}
-            disabled={loading}
-            className={`inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-              loading ? "opacity-70 cursor-not-allowed" : ""
-            }`}
-          >
-            {loading ? (
-              <>
-                <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Refreshing...
-              </>
-            ) : (
-              <>
-                <svg
-                  className="-ml-1 mr-2 h-4 w-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-                Refresh Data
-              </>
-            )}
-          </button>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50/80 via-white/60 to-purple-50/80 dark:from-gray-900/90 dark:via-slate-800/80 dark:to-purple-900/90">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 opacity-30 pointer-events-none">
+        <div className="absolute top-20 left-20 w-32 h-32 bg-gradient-to-r from-blue-400/40 to-cyan-400/40 rounded-full blur-2xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 bg-gradient-to-r from-purple-400/40 to-pink-400/40 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-r from-emerald-400/40 to-teal-400/40 rounded-full blur-xl animate-bounce delay-500"></div>
+        <div className="absolute top-1/3 right-1/3 w-20 h-20 bg-gradient-to-r from-orange-400/40 to-red-400/40 rounded-full blur-lg animate-pulse delay-700"></div>
       </div>
 
-      {/* Display wallet information if connected */}
-      {walletInfo && walletInfo.address && (
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <svg
-                className="h-5 w-5 text-blue-400"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                <path
-                  fillRule="evenodd"
-                  d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                Connected{" "}
-                {walletInfo.type.charAt(0).toUpperCase() +
-                  walletInfo.type.slice(1)}{" "}
-                wallet:{" "}
-                <span className="font-mono">{`${walletInfo.address.substring(
-                  0,
-                  6
-                )}...${walletInfo.address.substring(
-                  walletInfo.address.length - 4
-                )}`}</span>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Header Section */}
+        <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-3xl p-8 border border-white/20 dark:border-white/10 shadow-xl">
+          <div className="md:flex md:items-center md:justify-between">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 via-blue-600 to-purple-700 dark:from-white dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent">
+                Welcome Back, {userEmailRef.current?.split("@")[0] || "Trader"}!
+              </h1>
+              <p className="mt-2 text-gray-600 dark:text-gray-300">
+                Your comprehensive trading dashboard
               </p>
+              <div className="mt-4 flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">
+                    Market Open
+                  </span>
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Last updated: {new Date().toLocaleTimeString()}
+                </div>
+              </div>
+            </div>
+            <div className="flex mt-6 md:mt-0 gap-4 items-center">
+              <WalletConnect />
+              <button
+                onClick={refreshTokenData}
+                disabled={loading}
+                className={`inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105 ${
+                  loading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+              >
+                {loading ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="-ml-1 mr-2 h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                    Refresh Data
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
-      )}
 
-      {error && (
-        <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 px-4 py-3 rounded mb-6">
-          <p>{error}</p>
-        </div>
-      )}
-
-      {loading && tokens.length === 0 ? (
-        <div className="flex justify-center items-center h-64">
-          <LoadingSpinner />
-        </div>
-      ) : tokens.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-8 text-center">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-            ></path>
-          </svg>
-          <h3 className="mt-2 text-xl font-medium text-gray-900 dark:text-white">
-            No tokens found
-          </h3>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            New tokens will appear here as they are added.
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-blue-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+        {/* Wallet Connection Status */}
+        {walletInfo && walletInfo.address && (
+          <div className="backdrop-blur-sm bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-6 border-l-4 border-blue-500 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                    <svg
+                      className="h-6 w-6 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                      <path
+                        fillRule="evenodd"
+                        d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-blue-700 dark:text-blue-300">
+                    {walletInfo.type.charAt(0).toUpperCase() +
+                      walletInfo.type.slice(1)}{" "}
+                    Connected
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">
+                    {`${walletInfo.address.substring(
+                      0,
+                      6
+                    )}...${walletInfo.address.substring(
+                      walletInfo.address.length - 4
+                    )}`}
+                  </p>
+                </div>
               </div>
-              <div className="ml-3">
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Showing {tokens.length} tokens.{" "}
-                  {tokens.filter((t) => !t.processed).length} tokens are pending
-                  enrichment.
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Active
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Market Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Bitcoin Price
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  ${marketOverview.btcPrice.toLocaleString()}
+                </p>
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  +2.45%
                 </p>
               </div>
+              <div className="text-3xl">₿</div>
             </div>
           </div>
-          <TokenTable tokens={tokens} />
-        </>
-      )}
+
+          <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Ethereum Price
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  ${marketOverview.ethPrice.toLocaleString()}
+                </p>
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  +1.23%
+                </p>
+              </div>
+              <div className="text-3xl">Ξ</div>
+            </div>
+          </div>
+
+          <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Market Cap
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  ${(marketOverview.totalMarketCap / 1e12).toFixed(2)}T
+                </p>
+                <p className="text-sm text-green-600 dark:text-green-400">
+                  +0.89%
+                </p>
+              </div>
+              <div className="text-3xl">📊</div>
+            </div>
+          </div>
+
+          <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Fear & Greed
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {marketOverview.fearGreedIndex}
+                </p>
+                <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                  Greed
+                </p>
+              </div>
+              <div className="text-3xl">😱</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Portfolio Overview */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-3xl p-8 border border-white/20 dark:border-white/10 shadow-xl">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                Portfolio Overview
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                    Total Value
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                    ${portfolioData.totalValue.toLocaleString()}
+                  </p>
+                  <p
+                    className={`text-sm mt-1 ${
+                      portfolioData.totalChangePercent >= 0
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-red-600 dark:text-red-400"
+                    }`}
+                  >
+                    {portfolioData.totalChangePercent >= 0 ? "+" : ""}$
+                    {portfolioData.totalChange.toLocaleString()} (
+                    {portfolioData.totalChangePercent.toFixed(2)}%)
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                    Top Gainer
+                  </p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-white">
+                    {portfolioData.topGainer?.symbol || "N/A"}
+                  </p>
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                    +{portfolioData.topGainer?.change.toFixed(2)}%
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                    Top Loser
+                  </p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-white">
+                    {portfolioData.topLoser?.symbol || "N/A"}
+                  </p>
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                    {portfolioData.topLoser?.change.toFixed(2)}%
+                  </p>
+                </div>
+              </div>
+              <div className="mt-8 h-64 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-2xl flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-6xl mb-4">📈</div>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Portfolio Chart
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                    Coming Soon
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {/* Trading Stats */}
+            <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                Trading Stats
+              </h3>
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Total Trades
+                  </span>
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {tradingStats.totalTrades}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Success Rate
+                  </span>
+                  <span className="font-semibold text-green-600 dark:text-green-400">
+                    {tradingStats.successRate}%
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Avg Return
+                  </span>
+                  <span className="font-semibold text-blue-600 dark:text-blue-400">
+                    {tradingStats.avgReturn}%
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Daily Volume
+                  </span>
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    ${tradingStats.dailyVolume.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                Quick Actions
+              </h3>
+              <div className="space-y-3">
+                <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+                  🔄 Swap Tokens
+                </button>
+                <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105">
+                  💰 Start Trading
+                </button>
+                <button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white py-3 px-4 rounded-xl font-medium hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105">
+                  📊 View Analytics
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-3xl p-8 border border-white/20 dark:border-white/10 shadow-xl">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Recent Activity
+          </h2>
+          <div className="space-y-4">
+            {recentActivity.map((activity, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-4 bg-white/5 dark:bg-black/5 rounded-xl border border-white/10 dark:border-white/5"
+              >
+                <div className="flex items-center space-x-4">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      activity.type === "buy" ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  >
+                    {activity.type === "buy" ? "📈" : "📉"}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {activity.type === "buy" ? "Bought" : "Sold"}{" "}
+                      {activity.token}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {activity.amount.toLocaleString()} tokens at $
+                      {activity.price}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {activity.time}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="backdrop-blur-sm bg-red-50/50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-6 py-4 rounded-2xl shadow-lg">
+            <p>{error}</p>
+          </div>
+        )}
+
+        {/* Token Table Section */}
+        <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-3xl p-8 border border-white/20 dark:border-white/10 shadow-xl">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Token Discovery
+            </h2>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-gray-600 dark:text-gray-300">
+                  {tokens.length} tokens tracked
+                </span>
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {tokens.filter((t) => !t.processed).length} pending enrichment
+              </div>
+            </div>
+          </div>
+
+          {loading && tokens.length === 0 ? (
+            <div className="flex justify-center items-center h-64">
+              <LoadingSpinner />
+            </div>
+          ) : tokens.length === 0 ? (
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-2xl p-12 text-center">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                No tokens found
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                New tokens will appear here as they are discovered and added to
+                our database.
+              </p>
+              <button
+                onClick={refreshTokenData}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
+              >
+                Refresh Data
+              </button>
+            </div>
+          ) : (
+            <TokenTable tokens={tokens} />
+          )}
+        </div>
+
+        {/* Footer Information */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl text-center">
+            <div className="text-3xl mb-3">🚀</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+              Lightning Fast
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Real-time data updates and instant trade execution
+            </p>
+          </div>
+          <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl text-center">
+            <div className="text-3xl mb-3">🔒</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+              Secure
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Bank-grade security with multi-layer protection
+            </p>
+          </div>
+          <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl text-center">
+            <div className="text-3xl mb-3">📊</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+              Analytics
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Advanced analytics and insights for better trading
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -42,9 +42,6 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error("Error getting route:", error);
-    return NextResponse.json(
-      { error: "Failed to get route" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to get route" }, { status: 500 });
   }
 }

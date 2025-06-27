@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
@@ -34,6 +35,7 @@ export default function RootLayout({
             <Navbar />
             {/* Add padding-top to account for fixed navbar */}
             <main className="flex-1 pt-20">{children}</main>
+            <Footer />
           </div>
         </AuthProvider>
       </body>

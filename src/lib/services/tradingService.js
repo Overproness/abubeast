@@ -186,22 +186,25 @@ function isTradeWithinLimits(tradeInfo, settings) {
 async function getBestRoute(routeRequest) {
   try {
     // Use a server-side routing service instead of LiFi SDK directly
-    const response = await fetch(`${process.env.INTERNAL_API_URL}/api/internal/get-route`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': process.env.INTERNAL_API_KEY,
-      },
-      body: JSON.stringify(routeRequest),
-    });
+    const response = await fetch(
+      `${process.env.INTERNAL_API_URL}/api/internal/get-route`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": process.env.INTERNAL_API_KEY,
+        },
+        body: JSON.stringify(routeRequest),
+      }
+    );
 
     if (!response.ok) {
-      throw new Error('Failed to get route');
+      throw new Error("Failed to get route");
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Error getting route:', error);
+    console.error("Error getting route:", error);
     throw error;
   }
 }
