@@ -29,6 +29,22 @@ export async function signToken(payload) {
   }
 }
 
+// Generate a JWT token for a user (alias for signToken for compatibility)
+export async function generateToken(user) {
+  try {
+    const payload = {
+      userId: user._id.toString(),
+      email: user.email,
+      name: user.name,
+    };
+
+    return await signToken(payload);
+  } catch (error) {
+    console.error("Token generation error:", error);
+    throw error;
+  }
+}
+
 // Enhanced token verification
 export async function verifyToken(token) {
   try {

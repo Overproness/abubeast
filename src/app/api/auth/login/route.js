@@ -46,7 +46,7 @@ export async function POST(request) {
     }
 
     // Generate JWT token
-    const token = generateToken(user);
+    const token = await generateToken(user);
 
     // Set HTTP-only cookie with more permissive settings for debugging
     const cookie = serialize("token", token, {
