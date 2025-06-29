@@ -13,10 +13,11 @@ The AbuBeast API is a RESTful API built with Next.js App Router that provides cr
 The API uses JWT tokens for authentication. Tokens are stored as HTTP-only cookies and include user information.
 
 #### Token Structure
+
 ```json
 {
   "userId": "string",
-  "email": "string", 
+  "email": "string",
   "name": "string",
   "iat": "number",
   "exp": "number"
@@ -32,6 +33,7 @@ The API uses JWT tokens for authentication. Tokens are stored as HTTP-only cooki
 Register a new user account.
 
 **Request Body:**
+
 ```json
 {
   "email": "string",
@@ -41,11 +43,13 @@ Register a new user account.
 ```
 
 **Validation Rules:**
+
 - Email: Valid email format required
 - Password: Minimum 8 characters
 - Name: Required
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -58,6 +62,7 @@ Register a new user account.
 ```
 
 **Error Responses:**
+
 - `400` - Missing required fields / Invalid email format / Password too short
 - `409` - User already exists
 - `500` - Server error
@@ -69,6 +74,7 @@ Register a new user account.
 Authenticate a user and return JWT token.
 
 **Request Body:**
+
 ```json
 {
   "email": "string",
@@ -77,12 +83,13 @@ Authenticate a user and return JWT token.
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
   "user": {
     "id": "string",
-    "email": "string", 
+    "email": "string",
     "name": "string"
   }
 }
@@ -91,6 +98,7 @@ Authenticate a user and return JWT token.
 **Sets HTTP-only cookie:** `token=<jwt_token>`
 
 **Error Responses:**
+
 - `400` - Email and password required
 - `401` - Invalid credentials
 - `500` - Authentication failed
@@ -102,6 +110,7 @@ Authenticate a user and return JWT token.
 Logout user by clearing authentication cookie.
 
 **Success Response (200):**
+
 ```json
 {
   "success": true
@@ -115,11 +124,13 @@ Logout user by clearing authentication cookie.
 Get current authenticated user information.
 
 **Headers Required:**
+
 ```
 Cookie: token=<jwt_token>
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -134,6 +145,7 @@ Cookie: token=<jwt_token>
 ```
 
 **Error Responses:**
+
 - `401` - Not authenticated / Invalid token
 - `500` - Authentication check failed
 
@@ -148,6 +160,7 @@ Add a wallet address to the user's account.
 **Authentication Required:** Yes
 
 **Request Body:**
+
 ```json
 {
   "walletAddress": "string"
@@ -155,6 +168,7 @@ Add a wallet address to the user's account.
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -164,6 +178,7 @@ Add a wallet address to the user's account.
 ```
 
 **Error Responses:**
+
 - `401` - Unauthorized / Invalid token
 - `404` - User not found
 - `500` - Failed to add wallet address
@@ -177,6 +192,7 @@ Remove a wallet address from the user's account.
 **Authentication Required:** Yes
 
 **Request Body:**
+
 ```json
 {
   "walletAddress": "string"
@@ -184,6 +200,7 @@ Remove a wallet address from the user's account.
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -192,6 +209,7 @@ Remove a wallet address from the user's account.
 ```
 
 **Error Responses:**
+
 - `400` - Wallet address required
 - `401` - Unauthorized
 - `404` - User not found / Wallet not found
@@ -206,16 +224,18 @@ Remove a wallet address from the user's account.
 Verify wallet signature for authentication.
 
 **Request Body:**
+
 ```json
 {
   "address": "string",
-  "message": "string", 
+  "message": "string",
   "signature": "string",
   "walletType": "ethereum|solana"
 }
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "verified": true,
@@ -224,6 +244,7 @@ Verify wallet signature for authentication.
 ```
 
 **Error Responses:**
+
 - `400` - Address, message, and signature are required
 - `500` - Failed to verify signature
 
@@ -236,6 +257,7 @@ Grant trading permission for a wallet.
 **Authentication Required:** Yes
 
 **Request Body:**
+
 ```json
 {
   "walletAddress": "string",
@@ -246,6 +268,7 @@ Grant trading permission for a wallet.
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -262,6 +285,7 @@ Get all trading permissions for the authenticated user.
 **Authentication Required:** Yes
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -289,12 +313,13 @@ Update trading settings for a wallet.
 **Authentication Required:** Yes
 
 **Request Body:**
+
 ```json
 {
   "walletAddress": "string",
   "settings": {
     "strategy": "conservative|moderate|aggressive|custom",
-    "allowedTokens": "all|verified|trending|whitelisted", 
+    "allowedTokens": "all|verified|trending|whitelisted",
     "maxInvestmentPerToken": "number",
     "maxDailyInvestment": "number",
     "stopLossPercentage": "number",
@@ -304,6 +329,7 @@ Update trading settings for a wallet.
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -320,9 +346,11 @@ Get trading settings for a wallet.
 **Authentication Required:** Yes
 
 **Query Parameters:**
+
 - `walletAddress` (string, required)
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -330,7 +358,7 @@ Get trading settings for a wallet.
     "strategy": "string",
     "allowedTokens": "string",
     "maxInvestmentPerToken": "number",
-    "maxDailyInvestment": "number", 
+    "maxDailyInvestment": "number",
     "stopLossPercentage": "number",
     "takeProfitPercentage": "number"
   }
@@ -348,10 +376,12 @@ Get portfolio data for a wallet.
 **Authentication Required:** Yes
 
 **Query Parameters:**
+
 - `wallet` (string, required) - Wallet address
 - `type` (string, optional) - Wallet type: "ethereum" (default) | "solana"
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -380,6 +410,7 @@ Get portfolio data for a wallet.
 ```
 
 **Error Responses:**
+
 - `400` - Wallet address is required
 - `401` - Unauthorized
 - `500` - Failed to fetch portfolio data
@@ -393,10 +424,12 @@ Get portfolio data for a wallet.
 Get list of tokens with optional filtering.
 
 **Query Parameters:**
+
 - `since` (timestamp, optional) - Get tokens added since this timestamp
 - `limit` (number, optional) - Limit results (default: 100)
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -427,6 +460,7 @@ Get list of tokens with optional filtering.
 Add new tokens to the database (Admin endpoint).
 
 **Request Body:**
+
 ```json
 [
   {
@@ -438,6 +472,7 @@ Add new tokens to the database (Admin endpoint).
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -454,9 +489,11 @@ Add new tokens to the database (Admin endpoint).
 Get detailed information for a specific token.
 
 **Path Parameters:**
+
 - `address` (string, required) - Token contract address
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -479,6 +516,7 @@ Get detailed information for a specific token.
 ```
 
 **Error Responses:**
+
 - `400` - Token address is required
 - `404` - Token not found
 - `500` - Failed to fetch token data
@@ -490,12 +528,15 @@ Get detailed information for a specific token.
 Get OHLCV (candlestick) data for a token.
 
 **Path Parameters:**
+
 - `address` (string, required) - Token contract address
 
 **Query Parameters:**
+
 - `period` (string, optional) - Time period: "1min", "5min", "15min", "1h", "4h", "1d", "1w", "1M" (default: "1h")
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -503,7 +544,7 @@ Get OHLCV (candlestick) data for a token.
     {
       "timestamp": "number",
       "open": "number",
-      "high": "number", 
+      "high": "number",
       "low": "number",
       "close": "number",
       "volume": "number"
@@ -519,13 +560,16 @@ Get OHLCV (candlestick) data for a token.
 Get token holder information.
 
 **Path Parameters:**
+
 - `address` (string, required) - Token contract address
 
 **Query Parameters:**
+
 - `limit` (number, optional) - Limit results (default: 20)
 - `offset` (number, optional) - Offset for pagination (default: 0)
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -547,9 +591,11 @@ Get token holder information.
 Get recent transactions for a token.
 
 **Path Parameters:**
+
 - `address` (string, required) - Token contract address
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -574,6 +620,7 @@ Get recent transactions for a token.
 Trigger data enrichment for unprocessed tokens (Admin endpoint).
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -591,6 +638,7 @@ Trigger token analysis and automated trading (Admin endpoint).
 **Authentication Required:** Yes (Admin)
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -608,12 +656,13 @@ Get token analysis statistics (Admin endpoint).
 **Authentication Required:** Yes (Admin)
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
   "stats": {
     "total": "number",
-    "analyzed": "number", 
+    "analyzed": "number",
     "pending": "number",
     "recentTokens": [
       {
@@ -640,10 +689,11 @@ Save a completed swap transaction.
 **Authentication Required:** Yes
 
 **Request Body:**
+
 ```json
 {
   "fromToken": "string",
-  "toToken": "string", 
+  "toToken": "string",
   "fromChain": "string",
   "toChain": "string",
   "fromAmount": "string",
@@ -653,6 +703,7 @@ Save a completed swap transaction.
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -662,6 +713,7 @@ Save a completed swap transaction.
 ```
 
 **Error Responses:**
+
 - `400` - Missing required swap details
 - `401` - Unauthorized
 - `500` - Failed to save swap transaction
@@ -675,6 +727,7 @@ Get user's swap history.
 **Authentication Required:** Yes
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -684,7 +737,7 @@ Get user's swap history.
       "userId": "string",
       "fromToken": "string",
       "toToken": "string",
-      "fromChain": "string", 
+      "fromChain": "string",
       "toChain": "string",
       "fromAmount": "string",
       "toAmount": "string",
@@ -707,15 +760,18 @@ These endpoints require an internal API key (`X-API-Key` header) and are used fo
 Check trading permissions for a user and wallet.
 
 **Headers Required:**
+
 ```
 X-API-Key: <internal_api_key>
 ```
 
 **Query Parameters:**
+
 - `userId` (string, required)
 - `wallet` (string, required)
 
 **Success Response (200):**
+
 ```json
 {
   "hasPermission": true,
@@ -736,15 +792,18 @@ X-API-Key: <internal_api_key>
 Get trading settings for a user and wallet.
 
 **Headers Required:**
+
 ```
 X-API-Key: <internal_api_key>
 ```
 
 **Query Parameters:**
+
 - `userId` (string, required)
 - `wallet` (string, required)
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -767,11 +826,13 @@ X-API-Key: <internal_api_key>
 Check if a trade would exceed daily limits.
 
 **Headers Required:**
+
 ```
 X-API-Key: <internal_api_key>
 ```
 
 **Request Body:**
+
 ```json
 {
   "userId": "string",
@@ -781,6 +842,7 @@ X-API-Key: <internal_api_key>
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -799,11 +861,13 @@ X-API-Key: <internal_api_key>
 Log a completed trade.
 
 **Headers Required:**
+
 ```
 X-API-Key: <internal_api_key>
 ```
 
 **Request Body:**
+
 ```json
 {
   "walletAddress": "string",
@@ -822,6 +886,7 @@ X-API-Key: <internal_api_key>
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -836,15 +901,18 @@ X-API-Key: <internal_api_key>
 Get trade logs for a user or wallet.
 
 **Headers Required:**
+
 ```
 X-API-Key: <internal_api_key>
 ```
 
 **Query Parameters:**
+
 - `userId` (string, optional)
 - `wallet` (string, optional)
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -872,11 +940,13 @@ X-API-Key: <internal_api_key>
 Create a new trade order.
 
 **Headers Required:**
+
 ```
 X-API-Key: <internal_api_key>
 ```
 
 **Request Body:**
+
 ```json
 {
   "userId": "string",
@@ -892,6 +962,7 @@ X-API-Key: <internal_api_key>
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -906,16 +977,19 @@ X-API-Key: <internal_api_key>
 Get active trade orders.
 
 **Headers Required:**
+
 ```
 X-API-Key: <internal_api_key>
 ```
 
 **Query Parameters:**
+
 - `userId` (string, optional)
 - `wallet` (string, optional)
 - `status` (string, optional, default: "active")
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -942,11 +1016,13 @@ X-API-Key: <internal_api_key>
 Log a trade error.
 
 **Headers Required:**
+
 ```
 X-API-Key: <internal_api_key>
 ```
 
 **Request Body:**
+
 ```json
 {
   "userId": "string",
@@ -958,6 +1034,7 @@ X-API-Key: <internal_api_key>
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -972,23 +1049,26 @@ X-API-Key: <internal_api_key>
 Get trade errors for monitoring.
 
 **Headers Required:**
+
 ```
 X-API-Key: <internal_api_key>
 ```
 
 **Query Parameters:**
+
 - `userId` (string, optional)
 - `wallet` (string, optional)
 - `limit` (number, optional, default: 100)
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
   "errors": [
     {
       "_id": "string",
-      "userId": "string", 
+      "userId": "string",
       "walletAddress": "string",
       "error": "string",
       "tradeInfo": {},
@@ -1005,11 +1085,13 @@ X-API-Key: <internal_api_key>
 Get trading route information using LiFi API.
 
 **Headers Required:**
+
 ```
 X-API-Key: <internal_api_key>
 ```
 
 **Request Body:**
+
 ```json
 {
   "fromChainId": "string",
@@ -1023,6 +1105,7 @@ X-API-Key: <internal_api_key>
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "routes": [],
@@ -1065,6 +1148,7 @@ X-API-Key: <internal_api_key>
 ## CORS Configuration
 
 **Allowed Origins:**
+
 - Development: `http://localhost:3000`
 - Production: Configure in environment variables
 
@@ -1077,6 +1161,7 @@ X-API-Key: <internal_api_key>
 ## Data Models
 
 ### User
+
 ```javascript
 {
   email: String (required, unique),
@@ -1093,6 +1178,7 @@ X-API-Key: <internal_api_key>
 ```
 
 ### TradingPermission
+
 ```javascript
 {
   userId: ObjectId,
@@ -1110,6 +1196,7 @@ X-API-Key: <internal_api_key>
 ```
 
 ### Token
+
 ```javascript
 {
   mint_address: String (unique),
@@ -1130,6 +1217,7 @@ X-API-Key: <internal_api_key>
 ```
 
 ### SwapHistory
+
 ```javascript
 {
   userId: ObjectId,
@@ -1155,7 +1243,7 @@ X-API-Key: <internal_api_key>
 # Database
 MONGODB_URI=mongodb://localhost:27017/abubeast
 
-# Authentication  
+# Authentication
 JWT_SECRET=your-secret-key
 
 # External APIs
@@ -1175,6 +1263,7 @@ NODE_ENV=development|production
 ### Authentication Tests
 
 Run authentication tests:
+
 ```bash
 npm test -- __tests__/auth-core.test.js
 npm test -- __tests__/auth-e2e.test.js
@@ -1210,4 +1299,4 @@ npm test -- __tests__/api-format.test.js
 
 ---
 
-*Last Updated: June 29, 2025*
+_Last Updated: June 29, 2025_
