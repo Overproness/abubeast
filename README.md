@@ -1,5 +1,9 @@
 # AbuBeast Platform
 
+[![Test Suite](https://github.com/yourusername/abubeast/actions/workflows/test.yml/badge.svg)](https://github.com/yourusername/abubeast/actions/workflows/test.yml)
+[![Comprehensive Tests](https://github.com/yourusername/abubeast/actions/workflows/comprehensive-test.yml/badge.svg)](https://github.com/yourusername/abubeast/actions/workflows/comprehensive-test.yml)
+[![codecov](https://codecov.io/gh/yourusername/abubeast/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/abubeast)
+
 AbuBeast is a comprehensive web3 platform that integrates multiple blockchain technologies, cross-chain functionality, and financial tools in a modern web application.
 
 ## Project Overview
@@ -152,25 +156,60 @@ For alternative deployment options, you can use:
 - Netlify
 - Docker containers for custom hosting
 
-## Contributing
+## Testing
 
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add some amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+This project includes comprehensive testing with Jest and React Testing Library.
 
-## Security Considerations
+### Available Test Commands
 
-- JWT authentication with secure HTTP-only cookies
-- Password hashing with bcrypt
-- Environment variable protection for sensitive data
-- Regular dependency updates to patch security vulnerabilities
+```bash
+# Run all tests
+npm test
+# or
+yarn test
 
-## License
+# Run tests in watch mode
+npm run test:watch
+# or
+yarn test:watch
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+# Run tests with coverage report
+npm run test:coverage
+# or
+yarn test:coverage
+```
 
-## Contact
+### Test Structure
 
-Project Link: [https://github.com/yourusername/abubeast](https://github.com/yourusername/abubeast)
+- **Unit Tests**: Testing individual components and utilities
+- **Integration Tests**: Testing API endpoints and database interactions
+- **End-to-End Tests**: Testing complete user workflows
+- **API Format Tests**: Validating API response structures
+
+### Continuous Integration
+
+All tests run automatically via GitHub Actions on:
+
+- Every push to main/master branches
+- All pull requests
+- Daily scheduled runs
+- Manual workflow dispatch
+
+The CI pipeline includes:
+
+- Linting and code quality checks
+- Unit and integration tests
+- Build verification
+- Security audits
+- Coverage reporting
+
+### Test Files
+
+Tests are located in the `__tests__` directory and include:
+
+- `auth-*.test.js` - Authentication system tests
+- `api-format.test.js` - API response format validation
+
+---
+
+Ensure that your code passes the tests and adheres to the project's coding standards before submitting a pull request.

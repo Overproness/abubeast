@@ -1,0 +1,81 @@
+name: Quick PR Check
+
+# Fast feedback for pull requests
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  quick-check:
+    name: Quick PR Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch full history for better diff
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint on changed files
+        run: |
+          # Get list of changed JavaScript/TypeScript files
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(js|jsx|ts|tsx)$' | tr '\n' ' ')
+          if [ ! -z "$CHANGED_FILES" ]; then
+            echo "Linting changed files: $CHANGED_FILES"
+            npx eslint $CHANGED_FILES
+          else
+            echo "No JavaScript/TypeScript files changed"
+          fi
+
+      - name: Run tests related to changed files
+        run: |
+          # Run tests that might be affected by the changes
+          npm test -- --findRelatedTests $(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(js|jsx|ts|tsx)$' | tr '\n' ' ') --passWithNoTests
+        env:
+          NODE_ENV: test
+
+      - name: Check build
+        run: npm run build
+        env:
+          NODE_ENV: production
+          SKIP_BUILD_STATIC_GENERATION: true
+
+  pr-comment:
+    name: PR Comment
+    runs-on: ubuntu-latest
+    needs: quick-check
+    if: always()
+
+    steps:
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo, number } = context.issue;
+            const conclusion = '${{ needs.quick-check.result }}';
+
+            let message = '';
+            if (conclusion === 'success') {
+              message = '✅ Quick validation passed! Your PR looks good for a full review.';
+            } else if (conclusion === 'failure') {
+              message = '❌ Quick validation failed. Please check the logs and fix any issues before requesting a review.';
+            } else {
+              message = '⚠️ Quick validation had issues. Please check the workflow logs.';
+            }
+
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
+              body: message
+            });
