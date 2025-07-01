@@ -21,6 +21,15 @@ const UserSchema = new mongoose.Schema(
       required: [true, "Password is required"],
       minlength: [8, "Password must be at least 8 characters long"],
     },
+    // OTP fields
+    current_otp: {
+      type: String,
+      default: null,
+    },
+    otp_created_at: {
+      type: Date,
+      default: null,
+    },
     // Add wallet information
     wallets: [
       {
