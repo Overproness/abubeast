@@ -1,9 +1,44 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { motion } from "framer-motion";
 import Link from "next/link";
 
 export default function PricingPage() {
+  // Animation variants
+  const fadeInUp = {
+    initial: { opacity: 0, y: 60 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6 },
+  };
+
+  const fadeInLeft = {
+    initial: { opacity: 0, x: -60 },
+    animate: { opacity: 1, x: 0 },
+    transition: { duration: 0.6 },
+  };
+
+  const fadeInRight = {
+    initial: { opacity: 0, x: 60 },
+    animate: { opacity: 1, x: 0 },
+    transition: { duration: 0.6 },
+  };
+
+  const staggerContainer = {
+    initial: {},
+    animate: {
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const scaleOnHover = {
+    whileHover: { scale: 1.05 },
+    whileTap: { scale: 0.95 },
+    transition: { duration: 0.2 },
+  };
   const tiers = [
     {
       title: "Starter",
@@ -203,121 +238,310 @@ export default function PricingPage() {
       />
 
       {/* Pricing Cards */}
-      <section className="py-24 bg-white dark:bg-gray-900">
+      <motion.section
+        className="py-24 bg-white dark:bg-gray-900"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
             {tiers.map((tier, index) => (
-              <Card
+              <motion.div
                 key={index}
-                className={`relative overflow-hidden border-0 ${
-                  tier.popular
-                    ? "shadow-2xl scale-105 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20"
-                    : "shadow-lg hover:shadow-xl"
-                } transition-all duration-300`}
+                variants={fadeInUp}
+                whileHover={{
+                  y: -10,
+                  transition: { duration: 0.3 },
+                }}
               >
-                {tier.popular && (
-                  <div
-                    className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${tier.color}`}
-                  />
-                )}
-                {tier.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span
-                      className={`inline-flex px-4 py-1 rounded-full text-sm font-medium text-white bg-gradient-to-r ${tier.color}`}
+                <Card
+                  className={`relative overflow-hidden border-0 ${
+                    tier.popular
+                      ? "shadow-2xl scale-105 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20"
+                      : "shadow-lg hover:shadow-xl"
+                  } transition-all duration-300 h-full`}
+                >
+                  {tier.popular && (
+                    <motion.div
+                      className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${tier.color}`}
+                      initial={{ scaleX: 0 }}
+                      whileInView={{ scaleX: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: index * 0.2 }}
+                    />
+                  )}
+                  {tier.popular && (
+                    <motion.div
+                      className="absolute -top-3 left-1/2 transform -translate-x-1/2"
+                      initial={{ opacity: 0, y: -20, scale: 0.8 }}
+                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{
+                        duration: 0.6,
+                        delay: index * 0.2 + 0.3,
+                        type: "spring",
+                        stiffness: 200,
+                      }}
                     >
-                      Most Popular
-                    </span>
-                  </div>
-                )}
-                <CardContent className="p-8">
-                  <div className="text-center mb-8">
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                      {tier.title}
-                    </h3>
-                    <div className="mb-4">
-                      <span className="text-5xl font-bold text-gray-900 dark:text-white">
-                        {tier.price === "Custom" ? "" : "$"}
-                        {tier.price === "Free"
-                          ? "0"
-                          : tier.price.replace("$", "")}
-                      </span>
-                      {tier.price !== "Custom" && tier.price !== "Free" && (
-                        <span className="text-gray-600 dark:text-gray-400 ml-2">
-                          /{tier.period}
-                        </span>
-                      )}
-                      {tier.price === "Custom" && (
-                        <span className="text-2xl text-gray-600 dark:text-gray-400">
-                          {tier.period}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      {tier.description}
-                    </p>
-                  </div>
+                      <motion.span
+                        className={`inline-flex px-4 py-1 rounded-full text-sm font-medium text-white bg-gradient-to-r ${tier.color}`}
+                        animate={{
+                          boxShadow: [
+                            "0 0 20px rgba(59, 130, 246, 0.3)",
+                            "0 0 40px rgba(147, 51, 234, 0.3)",
+                          ],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                          ease: "easeInOut",
+                        }}
+                      >
+                        Most Popular
+                      </motion.span>
+                    </motion.div>
+                  )}
+                  <CardContent className="p-8">
+                    <motion.div
+                      className="text-center mb-8"
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <motion.h3
+                        className="text-2xl font-bold text-gray-900 dark:text-white mb-2"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
+                      >
+                        {tier.title}
+                      </motion.h3>
+                      <motion.div
+                        className="mb-4"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{
+                          duration: 0.6,
+                          delay: index * 0.1 + 0.4,
+                          type: "spring",
+                          stiffness: 200,
+                        }}
+                      >
+                        <motion.span
+                          className="text-5xl font-bold text-gray-900 dark:text-white"
+                          whileHover={{
+                            scale: 1.1,
+                            color: tier.popular ? "#3B82F6" : undefined,
+                          }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {tier.price === "Custom" ? "" : "$"}
+                          {tier.price === "Free"
+                            ? "0"
+                            : tier.price.replace("$", "")}
+                        </motion.span>
+                        {tier.price !== "Custom" && tier.price !== "Free" && (
+                          <span className="text-gray-600 dark:text-gray-400 ml-2">
+                            /{tier.period}
+                          </span>
+                        )}
+                        {tier.price === "Custom" && (
+                          <span className="text-2xl text-gray-600 dark:text-gray-400">
+                            {tier.period}
+                          </span>
+                        )}
+                      </motion.div>
+                      <motion.p
+                        className="text-gray-600 dark:text-gray-300"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: index * 0.1 + 0.6 }}
+                      >
+                        {tier.description}
+                      </motion.p>
+                    </motion.div>
 
-                  <ul className="space-y-4 mb-8">
-                    {tier.features.map((feature, i) => (
-                      <li key={i} className="flex items-start">
-                        <span className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                          <span className="text-white text-xs">✓</span>
-                        </span>
-                        <span className="text-gray-700 dark:text-gray-300">
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                    {tier.limitations.map((limitation, i) => (
-                      <li key={i} className="flex items-start opacity-60">
-                        <span className="w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-                          <span className="text-gray-600 text-xs">×</span>
-                        </span>
-                        <span className="text-gray-500 dark:text-gray-400">
-                          {limitation}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                    <motion.ul
+                      className="space-y-4 mb-8"
+                      variants={staggerContainer}
+                      initial="initial"
+                      whileInView="animate"
+                      viewport={{ once: true }}
+                    >
+                      {tier.features.map((feature, i) => (
+                        <motion.li
+                          key={i}
+                          className="flex items-start"
+                          variants={fadeInLeft}
+                          whileHover={{ x: 5 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <motion.span
+                            className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0"
+                            initial={{ scale: 0, rotate: -180 }}
+                            whileInView={{ scale: 1, rotate: 0 }}
+                            viewport={{ once: true }}
+                            transition={{
+                              duration: 0.5,
+                              delay: i * 0.05,
+                              type: "spring",
+                              stiffness: 200,
+                            }}
+                            whileHover={{
+                              scale: 1.2,
+                              boxShadow: "0 0 15px rgba(34, 197, 94, 0.5)",
+                            }}
+                          >
+                            <span className="text-white text-xs">✓</span>
+                          </motion.span>
+                          <motion.span
+                            className="text-gray-700 dark:text-gray-300"
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{
+                              duration: 0.4,
+                              delay: i * 0.05 + 0.2,
+                            }}
+                          >
+                            {feature}
+                          </motion.span>
+                        </motion.li>
+                      ))}
+                      {tier.limitations.map((limitation, i) => (
+                        <motion.li
+                          key={i}
+                          className="flex items-start opacity-60"
+                          variants={fadeInLeft}
+                        >
+                          <motion.span
+                            className="w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0"
+                            initial={{ scale: 0 }}
+                            whileInView={{ scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{
+                              duration: 0.3,
+                              delay: i * 0.05 + tier.features.length * 0.05,
+                            }}
+                          >
+                            <span className="text-gray-600 text-xs">×</span>
+                          </motion.span>
+                          <span className="text-gray-500 dark:text-gray-400">
+                            {limitation}
+                          </span>
+                        </motion.li>
+                      ))}
+                    </motion.ul>
 
-                  <Button
-                    className={`w-full py-3 ${
-                      tier.popular
-                        ? `bg-gradient-to-r ${tier.color} text-white hover:opacity-90`
-                        : ""
-                    }`}
-                    variant={tier.cta.variant}
-                    size="lg"
-                    asChild
-                  >
-                    <Link href={tier.cta.href}>{tier.cta.label}</Link>
-                  </Button>
-                </CardContent>
-              </Card>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: index * 0.1 + 0.8 }}
+                      {...scaleOnHover}
+                    >
+                      <Button
+                        className={`w-full py-3 ${
+                          tier.popular
+                            ? `bg-gradient-to-r ${tier.color} text-white hover:opacity-90`
+                            : ""
+                        }`}
+                        variant={tier.cta.variant}
+                        size="lg"
+                        asChild
+                      >
+                        <Link href={tier.cta.href}>{tier.cta.label}</Link>
+                      </Button>
+                    </motion.div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Feature Comparison */}
-      <section className="py-24 bg-gray-50 dark:bg-gray-800/50">
+      <motion.section
+        className="py-24 bg-gray-50 dark:bg-gray-800/50"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.h2
+              className="text-4xl font-bold text-gray-900 dark:text-white mb-4"
+              initial={{ scale: 0.9 }}
+              whileInView={{ scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
               Feature{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <motion.span
+                className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              >
                 Comparison
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300">
+              </motion.span>
+            </motion.h2>
+            <motion.p
+              className="text-xl text-gray-600 dark:text-gray-300"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
               Compare all features across our plans
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
+          <motion.div
+            className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden"
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            whileHover={{
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            }}
+          >
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+                <motion.thead
+                  className="bg-gray-50 dark:bg-gray-800"
+                  initial={{ opacity: 0, y: -20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                >
                   <tr>
                     <th className="text-left py-4 px-6 font-semibold text-gray-900 dark:text-white">
                       Features
@@ -332,13 +556,24 @@ export default function PricingPage() {
                       Enterprise
                     </th>
                   </tr>
-                </thead>
+                </motion.thead>
                 <tbody>
                   {features.map((category, categoryIndex) => (
-                    <>
-                      <tr
-                        key={categoryIndex}
+                    <motion.tbody
+                      key={categoryIndex}
+                      initial={{ opacity: 0, x: -50 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{
+                        duration: 0.5,
+                        delay: categoryIndex * 0.1 + 0.6,
+                      }}
+                    >
+                      <motion.tr
                         className="bg-blue-50 dark:bg-blue-900/20"
+                        whileHover={{
+                          backgroundColor: "rgba(59, 130, 246, 0.1)",
+                        }}
                       >
                         <td
                           colSpan={4}
@@ -346,21 +581,48 @@ export default function PricingPage() {
                         >
                           {category.category}
                         </td>
-                      </tr>
+                      </motion.tr>
                       {category.items.map((item, itemIndex) => (
-                        <tr
+                        <motion.tr
                           key={itemIndex}
                           className="border-b border-gray-200 dark:border-gray-700"
+                          initial={{ opacity: 0, x: -30 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{
+                            duration: 0.4,
+                            delay: categoryIndex * 0.1 + itemIndex * 0.05 + 0.8,
+                          }}
+                          whileHover={{
+                            backgroundColor: "rgba(0, 0, 0, 0.02)",
+                            x: 5,
+                          }}
                         >
                           <td className="py-4 px-6 text-gray-900 dark:text-white">
                             {item.name}
                           </td>
-                          <td className="py-4 px-6 text-center">
+                          <motion.td
+                            className="py-4 px-6 text-center"
+                            whileHover={{ scale: 1.1 }}
+                            transition={{ duration: 0.2 }}
+                          >
                             {typeof item.starter === "boolean" ? (
                               item.starter ? (
-                                <span className="text-green-500 text-xl">
+                                <motion.span
+                                  className="text-green-500 text-xl"
+                                  animate={{
+                                    scale: [1, 1.2, 1],
+                                    rotate: [0, 5, 0],
+                                  }}
+                                  transition={{
+                                    duration: 0.5,
+                                    delay: Math.random() * 2,
+                                    repeat: Infinity,
+                                    repeatDelay: 3,
+                                  }}
+                                >
                                   ✓
-                                </span>
+                                </motion.span>
                               ) : (
                                 <span className="text-gray-300 text-xl">×</span>
                               )
@@ -369,13 +631,29 @@ export default function PricingPage() {
                                 {item.starter}
                               </span>
                             )}
-                          </td>
-                          <td className="py-4 px-6 text-center">
+                          </motion.td>
+                          <motion.td
+                            className="py-4 px-6 text-center"
+                            whileHover={{ scale: 1.1 }}
+                            transition={{ duration: 0.2 }}
+                          >
                             {typeof item.pro === "boolean" ? (
                               item.pro ? (
-                                <span className="text-green-500 text-xl">
+                                <motion.span
+                                  className="text-green-500 text-xl"
+                                  animate={{
+                                    scale: [1, 1.2, 1],
+                                    rotate: [0, -5, 0],
+                                  }}
+                                  transition={{
+                                    duration: 0.5,
+                                    delay: Math.random() * 2,
+                                    repeat: Infinity,
+                                    repeatDelay: 3,
+                                  }}
+                                >
                                   ✓
-                                </span>
+                                </motion.span>
                               ) : (
                                 <span className="text-gray-300 text-xl">×</span>
                               )
@@ -384,13 +662,29 @@ export default function PricingPage() {
                                 {item.pro}
                               </span>
                             )}
-                          </td>
-                          <td className="py-4 px-6 text-center">
+                          </motion.td>
+                          <motion.td
+                            className="py-4 px-6 text-center"
+                            whileHover={{ scale: 1.1 }}
+                            transition={{ duration: 0.2 }}
+                          >
                             {typeof item.enterprise === "boolean" ? (
                               item.enterprise ? (
-                                <span className="text-green-500 text-xl">
+                                <motion.span
+                                  className="text-green-500 text-xl"
+                                  animate={{
+                                    scale: [1, 1.2, 1],
+                                    rotate: [0, 10, 0],
+                                  }}
+                                  transition={{
+                                    duration: 0.5,
+                                    delay: Math.random() * 2,
+                                    repeat: Infinity,
+                                    repeatDelay: 3,
+                                  }}
+                                >
                                   ✓
-                                </span>
+                                </motion.span>
                               ) : (
                                 <span className="text-gray-300 text-xl">×</span>
                               )
@@ -399,82 +693,240 @@ export default function PricingPage() {
                                 {item.enterprise}
                               </span>
                             )}
-                          </td>
-                        </tr>
+                          </motion.td>
+                        </motion.tr>
                       ))}
-                    </>
+                    </motion.tbody>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* FAQ Section */}
-      <section className="py-24 bg-white dark:bg-gray-900">
+      <motion.section
+        className="py-24 bg-white dark:bg-gray-900"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.h2
+              className="text-4xl font-bold text-gray-900 dark:text-white mb-4"
+              initial={{ scale: 0.9 }}
+              whileInView={{ scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
               Frequently Asked{" "}
-              <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                Questions
-              </span>
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300">
-              Got questions? We've got answers
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            {faqs.map((faq, index) => (
-              <Card
-                key={index}
-                className="border-0 shadow-md hover:shadow-lg transition-shadow"
+              <motion.span
+                className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent"
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
               >
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                    {faq.question}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                    {faq.answer}
-                  </p>
-                </CardContent>
-              </Card>
+                Questions
+              </motion.span>
+            </motion.h2>
+            <motion.p
+              className="text-xl text-gray-600 dark:text-gray-300"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              Got questions? We've got answers
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            className="space-y-6"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {faqs.map((faq, index) => (
+              <motion.div
+                key={index}
+                variants={fadeInUp}
+                whileHover={{
+                  y: -5,
+                  transition: { duration: 0.3 },
+                }}
+              >
+                <Card className="border-0 shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+                  <CardContent className="p-6">
+                    <motion.h3
+                      className="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      whileHover={{ x: 5 }}
+                    >
+                      {faq.question}
+                    </motion.h3>
+                    <motion.p
+                      className="text-gray-600 dark:text-gray-300 leading-relaxed"
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
+                    >
+                      {faq.answer}
+                    </motion.p>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Get Started?
-          </h2>
-          <p className="text-xl text-blue-100 max-w-2xl mx-auto mb-10">
+      <motion.section
+        className="py-24 bg-gradient-to-r from-blue-600 to-purple-600 relative overflow-hidden"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
+        <motion.div
+          className="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full blur-3xl"
+          animate={{
+            x: [0, 100, 0],
+            y: [0, 50, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"
+          animate={{
+            x: [0, -50, 0],
+            y: [0, -30, 0],
+            scale: [1, 0.8, 1],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2,
+          }}
+        />
+        <div className="relative max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <motion.h2
+            className="text-4xl md:text-5xl font-bold text-white mb-6"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            Ready to Get{" "}
+            <motion.span
+              animate={{
+                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent"
+            >
+              Started?
+            </motion.span>
+          </motion.h2>
+          <motion.p
+            className="text-xl text-blue-100 max-w-2xl mx-auto mb-10"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
             Join thousands of traders who trust AbuBeast for their crypto
             trading needs
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button
-              size="lg"
-              className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4"
-              asChild
+          </motion.p>
+          <motion.div
+            className="flex flex-col sm:flex-row justify-center gap-4"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <motion.div
+              whileHover={{
+                scale: 1.05,
+                y: -5,
+              }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Link href="/auth/signup">Start Free Today</Link>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-white text-white hover:bg-white/10 px-8 py-4"
-              asChild
+              <Button
+                size="lg"
+                className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 shadow-lg hover:shadow-xl"
+                asChild
+              >
+                <Link href="/auth/signup">Start Free Today</Link>
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{
+                scale: 1.05,
+                y: -5,
+              }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Link href="/contact">Contact Sales</Link>
-            </Button>
-          </div>
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white text-white hover:bg-white/10 px-8 py-4 backdrop-blur-sm"
+                asChild
+              >
+                <Link href="/contact">Contact Sales</Link>
+              </Button>
+            </motion.div>
+          </motion.div>
+          <motion.div
+            className="mt-8 text-blue-100/80"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            // transition={{ duration: 0.6, delay: 1 }}
+            animate={{
+              opacity: [0.6, 1, 0.6],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <p className="text-sm">
+              No credit card required • 14-day free trial • Cancel anytime
+            </p>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }

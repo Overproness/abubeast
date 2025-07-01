@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 import { Poppins, Roboto_Mono } from "next/font/google";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import TradingErrorBoundary from "../components/TradingErrorBoundary";
 import { AuthProvider } from "../context/AuthContext";
 import "./reset.css";
 
@@ -31,13 +32,15 @@ export default function RootLayout({ children }) {
       <body
         className={`${poppins.variable} ${robotoMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <AuthProvider>
-          <div className="flex flex-col min-h-screen bg-white">
-            <Navbar />
-            <main className="flex-grow pt-20">{children}</main>
-            <Footer />
-          </div>
-        </AuthProvider>
+        <TradingErrorBoundary>
+          <AuthProvider>
+            <div className="flex flex-col min-h-screen bg-white">
+              <Navbar />
+              <main className="flex-grow pt-20">{children}</main>
+              <Footer />
+            </div>
+          </AuthProvider>
+        </TradingErrorBoundary>
       </body>
     </html>
   );

@@ -1,8 +1,39 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/page-header";
+import { motion } from "framer-motion";
 import Link from "next/link";
+
+// Animation variants
+const fadeInUp = {
+  initial: { opacity: 0, y: 60 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6 },
+};
+
+const fadeInLeft = {
+  initial: { opacity: 0, x: -60 },
+  animate: { opacity: 1, x: 0 },
+  transition: { duration: 0.6 },
+};
+
+const fadeInRight = {
+  initial: { opacity: 0, x: 60 },
+  animate: { opacity: 1, x: 0 },
+  transition: { duration: 0.6 },
+};
+
+const staggerContainer = {
+  initial: {},
+  animate: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
 
 export default function BlogPage() {
   const featuredPosts = [
@@ -121,165 +152,416 @@ export default function BlogPage() {
         animatedBlobs={true}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+      <motion.div
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+      >
         {/* Featured Posts */}
-        <section>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <motion.div
+            className="flex items-center justify-between mb-8"
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.h2
+              className="text-3xl font-bold text-gray-900 dark:text-white"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
               Featured Articles
-            </h2>
-            <div className="h-1 flex-1 ml-6 bg-gradient-to-r from-blue-500 to-transparent rounded"></div>
-          </div>
+            </motion.h2>
+            <motion.div
+              className="h-1 flex-1 ml-6 bg-gradient-to-r from-blue-500 to-transparent rounded"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              style={{ originX: 0 }}
+            />
+          </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {featuredPosts.map((post) => (
-              <Card
-                key={post.slug}
-                className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
-              >
-                <div className="aspect-w-16 aspect-h-9 bg-gradient-to-r from-blue-500 to-purple-500 p-6 flex items-end">
-                  <div className="text-white">
-                    <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-2">
-                      {post.category}
-                    </span>
-                    <h3 className="text-xl font-bold">{post.title}</h3>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                    {post.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    <span>By {post.author}</span>
-                    <span>{post.readTime}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(post.date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </span>
-                    <Link href={`/blog/${post.slug}`}>
-                      <Button
-                        variant="ghost"
-                        className="group-hover:bg-blue-50 group-hover:text-blue-600 dark:group-hover:bg-blue-900/20"
+          <motion.div
+            className="grid md:grid-cols-2 gap-8"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {featuredPosts.map((post, index) => (
+              <motion.div key={post.slug} variants={fadeInUp}>
+                <motion.div
+                  whileHover={{
+                    y: -10,
+                    transition: { duration: 0.3 },
+                  }}
+                >
+                  <Card className="group hover:shadow-2xl transition-all duration-300 transform overflow-hidden">
+                    <motion.div
+                      className="aspect-w-16 aspect-h-9 bg-gradient-to-r from-blue-500 to-purple-500 p-6 flex items-end"
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="text-white">
+                        <motion.span
+                          className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-2"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.5, delay: index * 0.1 }}
+                          whileHover={{ scale: 1.1 }}
+                        >
+                          {post.category}
+                        </motion.span>
+                        <motion.h3
+                          className="text-xl font-bold"
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{
+                            duration: 0.5,
+                            delay: index * 0.1 + 0.2,
+                          }}
+                        >
+                          {post.title}
+                        </motion.h3>
+                      </div>
+                    </motion.div>
+                    <CardContent className="p-6">
+                      <motion.p
+                        className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: index * 0.1 + 0.3 }}
                       >
-                        Read More →
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+                        {post.excerpt}
+                      </motion.p>
+                      <motion.div
+                        className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4"
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: index * 0.1 + 0.4 }}
+                      >
+                        <span>By {post.author}</span>
+                        <span>{post.readTime}</span>
+                      </motion.div>
+                      <motion.div
+                        className="flex items-center justify-between"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: index * 0.1 + 0.5 }}
+                      >
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(post.date).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </span>
+                        <Link href={`/blog/${post.slug}`}>
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <Button
+                              variant="ghost"
+                              className="group-hover:bg-blue-50 group-hover:text-blue-600 dark:group-hover:bg-blue-900/20"
+                            >
+                              Read More →
+                            </Button>
+                          </motion.div>
+                        </Link>
+                      </motion.div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </motion.div>
             ))}
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
 
         {/* Categories Filter */}
-        <section>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {categories.map((category) => (
-              <button
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <motion.div
+            className="flex flex-wrap gap-2 justify-center"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {categories.map((category, index) => (
+              <motion.button
                 key={category.name}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                   category.active
                     ? "bg-blue-600 text-white shadow-lg"
                     : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
                 }`}
+                variants={fadeInUp}
+                whileHover={{
+                  scale: 1.05,
+                  y: -2,
+                }}
+                whileTap={{ scale: 0.95 }}
               >
                 {category.name} ({category.count})
-              </button>
+              </motion.button>
             ))}
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
 
         {/* Recent Posts */}
-        <section>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <motion.div
+            className="flex items-center justify-between mb-8"
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.h2
+              className="text-3xl font-bold text-gray-900 dark:text-white"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
               Latest Articles
-            </h2>
+            </motion.h2>
             <Link href="/blog/archive">
-              <Button variant="outline">View All Posts</Button>
-            </Link>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {recentPosts.map((post) => (
-              <Card
-                key={post.slug}
-                className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <div className="aspect-w-16 aspect-h-9 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4 flex items-end">
-                  <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">
-                    {post.category}
-                  </span>
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    <Link href={`/blog/${post.slug}`}>{post.title}</Link>
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                    {post.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    <span>By {post.author}</span>
-                    <span>{post.readTime}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {new Date(post.date).toLocaleDateString()}
-                    </span>
-                    <Link href={`/blog/${post.slug}`}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                <Button variant="outline">View All Posts</Button>
+              </motion.div>
+            </Link>
+          </motion.div>
+
+          <motion.div
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
+            {recentPosts.map((post, index) => (
+              <motion.div key={post.slug} variants={fadeInUp}>
+                <motion.div
+                  whileHover={{
+                    y: -10,
+                    transition: { duration: 0.3 },
+                  }}
+                >
+                  <Card className="group hover:shadow-xl transition-all duration-300 transform">
+                    <motion.div
+                      className="aspect-w-16 aspect-h-9 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4 flex items-end"
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <motion.span
+                        className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: index * 0.05 }}
+                        whileHover={{ scale: 1.1 }}
                       >
-                        Read →
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
+                        {post.category}
+                      </motion.span>
+                    </motion.div>
+                    <CardContent className="p-6">
+                      <motion.h3
+                        className="text-xl font-semibold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{
+                          duration: 0.5,
+                          delay: index * 0.05 + 0.1,
+                        }}
+                      >
+                        <Link href={`/blog/${post.slug}`}>{post.title}</Link>
+                      </motion.h3>
+                      <motion.p
+                        className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{
+                          duration: 0.5,
+                          delay: index * 0.05 + 0.2,
+                        }}
+                      >
+                        {post.excerpt}
+                      </motion.p>
+                      <motion.div
+                        className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4"
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{
+                          duration: 0.5,
+                          delay: index * 0.05 + 0.3,
+                        }}
+                      >
+                        <span>By {post.author}</span>
+                        <span>{post.readTime}</span>
+                      </motion.div>
+                      <motion.div
+                        className="flex items-center justify-between"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{
+                          duration: 0.5,
+                          delay: index * 0.05 + 0.4,
+                        }}
+                      >
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(post.date).toLocaleDateString()}
+                        </span>
+                        <Link href={`/blog/${post.slug}`}>
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              Read →
+                            </Button>
+                          </motion.div>
+                        </Link>
+                      </motion.div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </motion.div>
             ))}
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
 
         {/* Newsletter Signup */}
-        <section className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl overflow-hidden">
-          <div className="px-8 py-12 text-center text-white">
-            <h2 className="text-3xl font-bold mb-4">Stay in the Loop</h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+        <motion.section
+          className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl overflow-hidden"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <motion.div
+            className="px-8 py-12 text-center text-white"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <motion.h2
+              className="text-3xl font-bold mb-4"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              Stay in the Loop
+            </motion.h2>
+            <motion.p
+              className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
               Get the latest crypto insights, trading tips, and platform updates
               delivered to your inbox weekly.
-            </p>
-            <div className="max-w-md mx-auto flex gap-4">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:bg-white/20"
-              />
-              <Button
-                variant="secondary"
-                className="bg-white text-blue-600 hover:bg-gray-100"
+            </motion.p>
+            <motion.div
+              className="max-w-md mx-auto flex gap-4"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <motion.div className="flex-1" whileFocus={{ scale: 1.02 }}>
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:bg-white/20"
+                />
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Subscribe
-              </Button>
-            </div>
-            <p className="text-sm text-blue-100 mt-4">
+                <Button
+                  variant="secondary"
+                  className="bg-white text-blue-600 hover:bg-gray-100"
+                >
+                  Subscribe
+                </Button>
+              </motion.div>
+            </motion.div>
+            <motion.p
+              className="text-sm text-blue-100 mt-4"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+            >
               No spam, unsubscribe anytime. We respect your privacy.
-            </p>
-          </div>
-        </section>
+            </motion.p>
+          </motion.div>
+        </motion.section>
 
         {/* Popular Tags */}
-        <section>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <motion.h3
+            className="text-xl font-semibold text-gray-900 dark:text-white mb-4"
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
             Popular Topics
-          </h3>
-          <div className="flex flex-wrap gap-2">
+          </motion.h3>
+          <motion.div
+            className="flex flex-wrap gap-2"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+          >
             {[
               "Bitcoin",
               "Ethereum",
@@ -292,17 +574,24 @@ export default function BlogPage() {
               "Yield Farming",
               "Portfolio Management",
               "Risk Management",
-            ].map((tag) => (
-              <span
+            ].map((tag, index) => (
+              <motion.span
                 key={tag}
                 className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-blue-100 dark:hover:bg-blue-900/30 cursor-pointer transition-colors"
+                variants={fadeInUp}
+                whileHover={{
+                  scale: 1.1,
+                  y: -2,
+                  backgroundColor: "rgba(59, 130, 246, 0.1)",
+                }}
+                whileTap={{ scale: 0.95 }}
               >
                 #{tag}
-              </span>
+              </motion.span>
             ))}
-          </div>
-        </section>
-      </div>
+          </motion.div>
+        </motion.section>
+      </motion.div>
     </div>
   );
 }

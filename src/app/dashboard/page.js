@@ -4,10 +4,45 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import TokenTable from "@/components/TokenTable";
 import WalletConnect from "@/components/WalletConnect";
 import { useAuth } from "@/context/AuthContext";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export default function Dashboard() {
+  // Animation variants
+  const fadeInUp = {
+    initial: { opacity: 0, y: 60 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6 },
+  };
+
+  const fadeInLeft = {
+    initial: { opacity: 0, x: -60 },
+    animate: { opacity: 1, x: 0 },
+    transition: { duration: 0.6 },
+  };
+
+  const fadeInRight = {
+    initial: { opacity: 0, x: 60 },
+    animate: { opacity: 1, x: 0 },
+    transition: { duration: 0.6 },
+  };
+
+  const staggerContainer = {
+    initial: {},
+    animate: {
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const scaleOnHover = {
+    whileHover: { scale: 1.05 },
+    whileTap: { scale: 0.95 },
+    transition: { duration: 0.2 },
+  };
+
   const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -420,51 +455,154 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50/80 via-white/60 to-purple-50/80 dark:from-gray-900/90 dark:via-slate-800/80 dark:to-purple-900/90">
       {/* Animated background elements */}
       <div className="fixed inset-0 opacity-30 pointer-events-none">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-gradient-to-r from-blue-400/40 to-cyan-400/40 rounded-full blur-2xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-gradient-to-r from-purple-400/40 to-pink-400/40 rounded-full blur-2xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-r from-emerald-400/40 to-teal-400/40 rounded-full blur-xl animate-bounce delay-500"></div>
-        <div className="absolute top-1/3 right-1/3 w-20 h-20 bg-gradient-to-r from-orange-400/40 to-red-400/40 rounded-full blur-lg animate-pulse delay-700"></div>
+        <motion.div
+          className="absolute top-20 left-20 w-32 h-32 bg-gradient-to-r from-blue-400/40 to-cyan-400/40 rounded-full blur-2xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-20 w-40 h-40 bg-gradient-to-r from-purple-400/40 to-pink-400/40 rounded-full blur-2xl"
+          animate={{
+            scale: [1, 0.8, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
+        />
+        <motion.div
+          className="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-r from-emerald-400/40 to-teal-400/40 rounded-full blur-xl"
+          animate={{
+            y: [0, -30, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.5,
+          }}
+        />
+        <motion.div
+          className="absolute top-1/3 right-1/3 w-20 h-20 bg-gradient-to-r from-orange-400/40 to-red-400/40 rounded-full blur-lg"
+          animate={{
+            rotate: [0, 180, 360],
+            scale: [1, 1.3, 1],
+          }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            ease: "linear",
+            delay: 0.7,
+          }}
+        />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header Section */}
-        <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-3xl p-8 border border-white/20 dark:border-white/10 shadow-xl">
+        <motion.div
+          className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-3xl p-8 border border-white/20 dark:border-white/10 shadow-xl"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
           <div className="md:flex md:items-center md:justify-between">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 via-blue-600 to-purple-700 dark:from-white dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <motion.h1
+                className="text-4xl font-bold bg-gradient-to-r from-gray-800 via-blue-600 to-purple-700 dark:from-white dark:via-blue-300 dark:to-purple-300 bg-clip-text text-transparent"
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              >
                 Welcome Back, {userEmailRef.current?.split("@")[0] || "Trader"}!
-              </h1>
-              <p className="mt-2 text-gray-600 dark:text-gray-300">
+              </motion.h1>
+              <motion.p
+                className="mt-2 text-gray-600 dark:text-gray-300"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
                 Your comprehensive trading dashboard
-              </p>
-              <div className="mt-4 flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              </motion.p>
+              <motion.div
+                className="mt-4 flex items-center space-x-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
+                <motion.div
+                  className="flex items-center space-x-2"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <motion.div
+                    className="w-3 h-3 bg-green-500 rounded-full"
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.7, 1, 0.7],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
                   <span className="text-sm text-gray-600 dark:text-gray-300">
                     Market Open
                   </span>
-                </div>
+                </motion.div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   Last updated: {new Date().toLocaleTimeString()}
                 </div>
-              </div>
-            </div>
-            <div className="flex mt-6 md:mt-0 gap-4 items-center">
+              </motion.div>
+            </motion.div>
+            <motion.div
+              className="flex mt-6 md:mt-0 gap-4 items-center"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
               <WalletConnect />
-              <button
+              <motion.button
                 onClick={refreshTokenData}
                 disabled={loading}
-                className={`inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105 ${
+                className={`inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform ${
                   loading ? "opacity-70 cursor-not-allowed" : ""
                 }`}
+                whileHover={{ scale: loading ? 1 : 1.05 }}
+                whileTap={{ scale: loading ? 1 : 0.95 }}
               >
                 {loading ? (
                   <>
-                    <svg
+                    <motion.svg
                       className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
                     >
                       <circle
                         className="opacity-25"
@@ -479,7 +617,7 @@ export default function Dashboard() {
                         fill="currentColor"
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
-                    </svg>
+                    </motion.svg>
                     Refreshing...
                   </>
                 ) : (
@@ -501,18 +639,42 @@ export default function Dashboard() {
                     Refresh Data
                   </>
                 )}
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Wallet Connection Status */}
         {walletInfo && walletInfo.address && (
-          <div className="backdrop-blur-sm bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-6 border-l-4 border-blue-500 shadow-lg">
+          <motion.div
+            className="backdrop-blur-sm bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-6 border-l-4 border-blue-500 shadow-lg"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            whileHover={{ y: -5 }}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                <motion.div
+                  className="flex-shrink-0"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <motion.div
+                    className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center"
+                    animate={{
+                      boxShadow: [
+                        "0 0 0 0 rgba(59, 130, 246, 0.7)",
+                        "0 0 0 10px rgba(59, 130, 246, 0)",
+                        "0 0 0 0 rgba(59, 130, 246, 0)",
+                      ],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
                     <svg
                       className="h-6 w-6 text-white"
                       fill="currentColor"
@@ -525,9 +687,13 @@ export default function Dashboard() {
                         clipRule="evenodd"
                       />
                     </svg>
-                  </div>
-                </div>
-                <div>
+                  </motion.div>
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                >
                   <p className="text-lg font-semibold text-blue-700 dark:text-blue-300">
                     {walletInfo.type.charAt(0).toUpperCase() +
                       walletInfo.type.slice(1)}{" "}
@@ -541,214 +707,523 @@ export default function Dashboard() {
                       walletInfo.address.length - 4
                     )}`}
                   </p>
-                </div>
+                </motion.div>
               </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              <motion.div
+                className="flex items-center space-x-2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+              >
+                <motion.div
+                  className="w-3 h-3 bg-green-500 rounded-full"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.7, 1, 0.7],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   Active
                 </span>
-              </div>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Market Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+        >
+          <motion.div
+            className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl"
+            variants={fadeInUp}
+            whileHover={{
+              y: -10,
+              transition: { duration: 0.3 },
+            }}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Bitcoin Price
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <motion.p
+                  className="text-2xl font-bold text-gray-900 dark:text-white"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                >
                   ${marketOverview.btcPrice.toLocaleString()}
-                </p>
-                <p className="text-sm text-green-600 dark:text-green-400">
+                </motion.p>
+                <motion.p
+                  className="text-sm text-green-600 dark:text-green-400"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                >
                   +2.45%
-                </p>
+                </motion.p>
               </div>
-              <div className="text-3xl">₿</div>
+              <motion.div
+                className="text-3xl"
+                animate={{
+                  rotate: [0, 10, -10, 0],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                ₿
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl">
+          <motion.div
+            className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl"
+            variants={fadeInUp}
+            whileHover={{
+              y: -10,
+              transition: { duration: 0.3 },
+            }}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Ethereum Price
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <motion.p
+                  className="text-2xl font-bold text-gray-900 dark:text-white"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                >
                   ${marketOverview.ethPrice.toLocaleString()}
-                </p>
-                <p className="text-sm text-green-600 dark:text-green-400">
+                </motion.p>
+                <motion.p
+                  className="text-sm text-green-600 dark:text-green-400"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                >
                   +1.23%
-                </p>
+                </motion.p>
               </div>
-              <div className="text-3xl">Ξ</div>
+              <motion.div
+                className="text-3xl"
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.8, 1, 0.8],
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                Ξ
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl">
+          <motion.div
+            className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl"
+            variants={fadeInUp}
+            whileHover={{
+              y: -10,
+              transition: { duration: 0.3 },
+            }}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Market Cap
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <motion.p
+                  className="text-2xl font-bold text-gray-900 dark:text-white"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                >
                   ${(marketOverview.totalMarketCap / 1e12).toFixed(2)}T
-                </p>
-                <p className="text-sm text-green-600 dark:text-green-400">
+                </motion.p>
+                <motion.p
+                  className="text-sm text-green-600 dark:text-green-400"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.6 }}
+                >
                   +0.89%
-                </p>
+                </motion.p>
               </div>
-              <div className="text-3xl">📊</div>
+              <motion.div
+                className="text-3xl"
+                animate={{
+                  y: [0, -5, 0],
+                  rotateY: [0, 180, 360],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                📊
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl">
+          <motion.div
+            className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl"
+            variants={fadeInUp}
+            whileHover={{
+              y: -10,
+              transition: { duration: 0.3 },
+            }}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Fear & Greed
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <motion.p
+                  className="text-2xl font-bold text-gray-900 dark:text-white"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                >
                   {marketOverview.fearGreedIndex}
-                </p>
-                <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                </motion.p>
+                <motion.p
+                  className="text-sm text-yellow-600 dark:text-yellow-400"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.7 }}
+                >
                   Greed
-                </p>
+                </motion.p>
               </div>
-              <div className="text-3xl">😱</div>
+              <motion.div
+                className="text-3xl"
+                animate={{
+                  rotate: [0, 15, -15, 0],
+                  scale: [1, 1.2, 1],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                😱
+              </motion.div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Portfolio Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-3xl p-8 border border-white/20 dark:border-white/10 shadow-xl">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        <motion.div
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+        >
+          <motion.div
+            className="lg:col-span-2"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+          >
+            <motion.div
+              className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-3xl p-8 border border-white/20 dark:border-white/10 shadow-xl"
+              whileHover={{ y: -5 }}
+            >
+              <motion.h2
+                className="text-2xl font-bold text-gray-900 dark:text-white mb-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1 }}
+              >
                 Portfolio Overview
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+              </motion.h2>
+              <motion.div
+                className="grid grid-cols-1 md:grid-cols-3 gap-6"
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+              >
+                <motion.div className="text-center" variants={fadeInUp}>
+                  <motion.p
+                    className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 1.2 }}
+                  >
                     Total Value
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                  </motion.p>
+                  <motion.p
+                    className="text-3xl font-bold text-gray-900 dark:text-white"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      duration: 0.8,
+                      delay: 1.3,
+                      type: "spring",
+                      stiffness: 200,
+                    }}
+                  >
                     ${portfolioData.totalValue.toLocaleString()}
-                  </p>
-                  <p
+                  </motion.p>
+                  <motion.p
                     className={`text-sm mt-1 ${
                       portfolioData.totalChangePercent >= 0
                         ? "text-green-600 dark:text-green-400"
                         : "text-red-600 dark:text-red-400"
                     }`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 1.4 }}
                   >
                     {portfolioData.totalChangePercent >= 0 ? "+" : ""}$
                     {portfolioData.totalChange.toLocaleString()} (
                     {portfolioData.totalChangePercent.toFixed(2)}%)
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                  </motion.p>
+                </motion.div>
+                <motion.div className="text-center" variants={fadeInUp}>
+                  <motion.p
+                    className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 1.5 }}
+                  >
                     Top Gainer
-                  </p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">
+                  </motion.p>
+                  <motion.p
+                    className="text-xl font-bold text-gray-900 dark:text-white"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      duration: 0.8,
+                      delay: 1.6,
+                      type: "spring",
+                      stiffness: 200,
+                    }}
+                  >
                     {portfolioData.topGainer?.symbol || "N/A"}
-                  </p>
-                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                  </motion.p>
+                  <motion.p
+                    className="text-sm text-green-600 dark:text-green-400 mt-1"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 1.7 }}
+                  >
                     +{portfolioData.topGainer?.change.toFixed(2)}%
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                  </motion.p>
+                </motion.div>
+                <motion.div className="text-center" variants={fadeInUp}>
+                  <motion.p
+                    className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 1.8 }}
+                  >
                     Top Loser
-                  </p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">
+                  </motion.p>
+                  <motion.p
+                    className="text-xl font-bold text-gray-900 dark:text-white"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      duration: 0.8,
+                      delay: 1.9,
+                      type: "spring",
+                      stiffness: 200,
+                    }}
+                  >
                     {portfolioData.topLoser?.symbol || "N/A"}
-                  </p>
-                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                  </motion.p>
+                  <motion.p
+                    className="text-sm text-red-600 dark:text-red-400 mt-1"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 2 }}
+                  >
                     {portfolioData.topLoser?.change.toFixed(2)}%
-                  </p>
-                </div>
-              </div>
-              <div className="mt-8 h-64 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-2xl flex items-center justify-center">
+                  </motion.p>
+                </motion.div>
+              </motion.div>
+              <motion.div
+                className="mt-8 h-64 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-2xl flex items-center justify-center"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 2.1 }}
+                whileHover={{ scale: 1.02 }}
+              >
                 <div className="text-center">
-                  <div className="text-6xl mb-4">📈</div>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <motion.div
+                    className="text-6xl mb-4"
+                    animate={{
+                      y: [0, -10, 0],
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    📈
+                  </motion.div>
+                  <motion.p
+                    className="text-gray-600 dark:text-gray-400"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 2.3 }}
+                  >
                     Portfolio Chart
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                  </motion.p>
+                  <motion.p
+                    className="text-sm text-gray-500 dark:text-gray-500"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 2.4 }}
+                  >
                     Coming Soon
-                  </p>
+                  </motion.p>
                 </div>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
 
-          <div className="space-y-6">
+          <motion.div
+            className="space-y-6"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 1 }}
+          >
             {/* Trading Stats */}
-            <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+            <motion.div
+              className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl"
+              whileHover={{ y: -5 }}
+            >
+              <motion.h3
+                className="text-lg font-bold text-gray-900 dark:text-white mb-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.2 }}
+              >
                 Trading Stats
-              </h3>
-              <div className="space-y-4">
-                <div className="flex justify-between">
+              </motion.h3>
+              <motion.div
+                className="space-y-4"
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+              >
+                <motion.div
+                  className="flex justify-between"
+                  variants={fadeInLeft}
+                >
                   <span className="text-gray-600 dark:text-gray-400">
                     Total Trades
                   </span>
                   <span className="font-semibold text-gray-900 dark:text-white">
                     {tradingStats.totalTrades}
                   </span>
-                </div>
-                <div className="flex justify-between">
+                </motion.div>
+                <motion.div
+                  className="flex justify-between"
+                  variants={fadeInLeft}
+                >
                   <span className="text-gray-600 dark:text-gray-400">
                     Success Rate
                   </span>
                   <span className="font-semibold text-green-600 dark:text-green-400">
                     {tradingStats.successRate}%
                   </span>
-                </div>
-                <div className="flex justify-between">
+                </motion.div>
+                <motion.div
+                  className="flex justify-between"
+                  variants={fadeInLeft}
+                >
                   <span className="text-gray-600 dark:text-gray-400">
                     Avg Return
                   </span>
                   <span className="font-semibold text-blue-600 dark:text-blue-400">
                     {tradingStats.avgReturn}%
                   </span>
-                </div>
-                <div className="flex justify-between">
+                </motion.div>
+                <motion.div
+                  className="flex justify-between"
+                  variants={fadeInLeft}
+                >
                   <span className="text-gray-600 dark:text-gray-400">
                     Daily Volume
                   </span>
                   <span className="font-semibold text-gray-900 dark:text-white">
                     ${tradingStats.dailyVolume.toLocaleString()}
                   </span>
-                </div>
-              </div>
-            </div>
+                </motion.div>
+              </motion.div>
+            </motion.div>
 
             {/* Quick Actions */}
-            <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+            <motion.div
+              className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-2xl p-6 border border-white/20 dark:border-white/10 shadow-xl"
+              whileHover={{ y: -5 }}
+            >
+              <motion.h3
+                className="text-lg font-bold text-gray-900 dark:text-white mb-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.5 }}
+              >
                 Quick Actions
-              </h3>
-              <div className="space-y-3">
-                <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+              </motion.h3>
+              <motion.div
+                className="space-y-3"
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+              >
+                <motion.button
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
+                  variants={fadeInUp}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   🔄 Swap Tokens
-                </button>
-                <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105">
+                </motion.button>
+                <motion.button
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300"
+                  variants={fadeInUp}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   💰 Start Trading
-                </button>
-                <button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white py-3 px-4 rounded-xl font-medium hover:from-purple-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-105">
+                </motion.button>
+                <motion.button
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white py-3 px-4 rounded-xl font-medium hover:from-purple-600 hover:to-pink-700 transition-all duration-300"
+                  variants={fadeInUp}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   📊 View Analytics
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
         {/* Recent Activity */}
         <div className="backdrop-blur-sm bg-white/10 dark:bg-black/10 rounded-3xl p-8 border border-white/20 dark:border-white/10 shadow-xl">
