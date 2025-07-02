@@ -41,7 +41,14 @@ jest.mock("next/navigation", () => ({
     };
   },
   usePathname: () => "/",
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => {
+    const params = new URLSearchParams();
+    params.get = jest.fn((key) => {
+      if (key === 'email') return 'test@example.com';
+      return null;
+    });
+    return params;
+  },
 }));
 
 // Mock environment variables
