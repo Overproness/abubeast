@@ -1,6 +1,8 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import ThemeScript from "@/components/ThemeScript";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import "./globals.css";
 
 export const metadata = {
@@ -30,14 +32,17 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <AuthProvider>
-          <div className="min-h-screen flex flex-col">
-            <Navbar />
-            {/* Add padding-top to account for fixed navbar */}
-            <main className="flex-1 pt-20">{children}</main>
-            <Footer />
-          </div>
-        </AuthProvider>
+        <ThemeProvider>
+          <ThemeScript />
+          <AuthProvider>
+            <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
+              <Navbar />
+              {/* Add padding-top to account for fixed navbar */}
+              <main className="flex-1 pt-20">{children}</main>
+              <Footer />
+            </div>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import DarkModeToggle from "@/components/ui/DarkModeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -119,6 +120,9 @@ export default function Navbar() {
                 </Link>
               ))}
 
+              {/* Dark Mode Toggle */}
+              <DarkModeToggle />
+
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -163,7 +167,10 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center space-x-2">
+            {/* Dark Mode Toggle for mobile */}
+            <DarkModeToggle />
+
             <Button
               variant="ghost"
               size="icon"
