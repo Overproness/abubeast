@@ -5,6 +5,7 @@ import MarketOverview from "@/components/dashboard/MarketOverview";
 import PortfolioOverview from "@/components/dashboard/PortfolioOverview";
 import QuickActions from "@/components/dashboard/QuickActions";
 import RecentActivity from "@/components/dashboard/RecentActivity";
+import TokenDiscoverySection from "@/components/dashboard/TokenDiscoverySection";
 import TradingStats from "@/components/dashboard/TradingStats";
 import WalletStatus from "@/components/dashboard/WalletStatus";
 import DexScreenerChart from "@/components/DexScreenerChart";
@@ -205,27 +206,15 @@ export default function Dashboard() {
   // Data fetching functions
   async function fetchTokens() {
     try {
-      console.log("[Dashboard] Fetching tokens...");
       const response = await fetch("/api/tokens?limit=50", {
         credentials: "include",
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (response.ok) {
+        const data = await response.json();
+        setTokens(Array.isArray(data) ? data.slice(0, 50) : []);
       }
-
-      const data = await response.json();
-      console.log("[Dashboard] Received tokens data:", data);
-
-      // Handle both array response and object response
-      const tokensArray = Array.isArray(data) ? data : data.tokens || [];
-      const limitedTokens = tokensArray.slice(0, 50);
-
-      console.log(`[Dashboard] Setting ${limitedTokens.length} tokens`);
-      setTokens(limitedTokens);
     } catch (error) {
-      console.error("[Dashboard] Error fetching tokens:", error);
-      setTokens([]); // Set empty array on error
+      console.error("Error fetching tokens:", error);
     }
   }
 
@@ -375,12 +364,12 @@ export default function Dashboard() {
           </div>
 
           {/* Token Discovery Section */}
-          {/* <TokenDiscoverySection
+          <TokenDiscoverySection
             tokens={tokens}
             loading={loading}
             onTokenClick={handleTokenClick}
             onRefreshData={refreshTokenData}
-          /> */}
+          />
 
           {/* Token Table */}
           <motion.div variants={fadeInUp}>

@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { createChart } from "lightweight-charts";
+import { useTheme } from "@/context/ThemeContext";
 import {
-  calculateRSI,
-  calculateMACD,
   calculateBollingerBands,
   calculateFibonacciLevels,
+  calculateMACD,
+  calculateRSI,
 } from "@/lib/utils/technicalIndicators";
+import { createChart } from "lightweight-charts";
+import { useEffect, useRef, useState } from "react";
 
 export default function TokenChart({ tokenAddress }) {
   const chartContainerRef = useRef(null);
@@ -19,7 +20,27 @@ export default function TokenChart({ tokenAddress }) {
   const [period, setPeriod] = useState("1h");
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  // Safely get theme context
+  let isDarkMode = false;
+  try {
+    const theme = useTheme();
+    isDarkMode = theme?.isDarkMode || false;
+  } catch (error) {
+    // Fallback to light mode if context not available
+    console.warn(
+      "TokenChart: useTheme hook called outside ThemeProvider, using light mode"
+    );
+    isDarkMode = false;
+  }
+
   const apiKey = process.env.NEXT_PUBLIC_MOBULA_API_KEY || "";
+
+  // Ensure component is mounted
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Add state for technical indicators
   const [activeIndicators, setActiveIndicators] = useState({
@@ -29,39 +50,55 @@ export default function TokenChart({ tokenAddress }) {
     fibonacci: false,
   });
 
+  // Theme-aware chart options
+  const getChartOptions = () => ({
+    layout: {
+      textColor: isDarkMode ? "rgba(255, 255, 255, 0.9)" : "rgba(0, 0, 0, 0.9)",
+      background: { type: "solid", color: "transparent" },
+    },
+    grid: {
+      vertLines: {
+        color: isDarkMode
+          ? "rgba(42, 46, 57, 0.6)"
+          : "rgba(229, 231, 235, 0.6)",
+      },
+      horzLines: {
+        color: isDarkMode
+          ? "rgba(42, 46, 57, 0.6)"
+          : "rgba(229, 231, 235, 0.6)",
+      },
+    },
+    timeScale: {
+      timeVisible: true,
+      secondsVisible: false,
+      borderColor: isDarkMode
+        ? "rgba(42, 46, 57, 0.6)"
+        : "rgba(229, 231, 235, 0.6)",
+    },
+    rightPriceScale: {
+      borderColor: isDarkMode
+        ? "rgba(42, 46, 57, 0.6)"
+        : "rgba(229, 231, 235, 0.6)",
+    },
+    crosshair: {
+      mode: 1,
+    },
+    localization: {
+      timeFormatter: (time) => {
+        const date = new Date(time * 1000);
+        return date.toLocaleDateString() + " " + date.toLocaleTimeString();
+      },
+    },
+    handleScale: {
+      mouseWheel: true,
+      pinch: true,
+    },
+  });
+
+  // Initialize chart on first render
   useEffect(() => {
-    // Initialize chart
     if (chartContainerRef.current && !chartRef.current) {
-      const chartOptions = {
-        layout: {
-          textColor: "rgba(255, 255, 255, 0.9)",
-          background: { type: "solid", color: "rgba(19, 23, 34, 0.0)" },
-        },
-        grid: {
-          vertLines: { color: "rgba(42, 46, 57, 0.6)" },
-          horzLines: { color: "rgba(42, 46, 57, 0.6)" },
-        },
-        timeScale: {
-          timeVisible: true,
-          secondsVisible: false,
-        },
-        crosshair: {
-          mode: 1,
-        },
-        localization: {
-          timeFormatter: (time) => {
-            const date = new Date(time * 1000);
-            return date.toLocaleDateString() + " " + date.toLocaleTimeString();
-          },
-        },
-        handleScale: {
-          mouseWheel: true,
-          pinch: true,
-        },
-        rightPriceScale: {
-          borderVisible: false,
-        },
-      };
+      const chartOptions = getChartOptions();
 
       // Create chart
       chartRef.current = createChart(chartContainerRef.current, chartOptions);
@@ -71,7 +108,9 @@ export default function TokenChart({ tokenAddress }) {
           fontSize: 24,
           horzAlign: "center",
           vertAlign: "center",
-          color: "rgba(171, 71, 188, 0.3)",
+          color: isDarkMode
+            ? "rgba(99, 102, 241, 0.3)"
+            : "rgba(171, 71, 188, 0.3)",
           text: "AbuBeast",
         },
       });
@@ -118,6 +157,28 @@ export default function TokenChart({ tokenAddress }) {
       }
     };
   }, [tokenAddress]); // Re-initialize when token changes
+
+  // Update chart theme when dark mode changes
+  useEffect(() => {
+    if (chartRef.current) {
+      const newOptions = getChartOptions();
+      chartRef.current.applyOptions(newOptions);
+
+      // Update watermark color
+      chartRef.current.applyOptions({
+        watermark: {
+          visible: true,
+          fontSize: 24,
+          horzAlign: "center",
+          vertAlign: "center",
+          color: isDarkMode
+            ? "rgba(99, 102, 241, 0.3)"
+            : "rgba(171, 71, 188, 0.3)",
+          text: "AbuBeast",
+        },
+      });
+    }
+  }, [isDarkMode]);
 
   // Update chart when period changes
   useEffect(() => {

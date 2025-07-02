@@ -34,6 +34,15 @@
     --ring: 221.2 83.2% 53.3%;
 
     --radius: 0.5rem;
+
+    /* Custom theme colors */
+    --nav-bg: 255 255 255;
+    --nav-border: 229 231 235;
+    --hero-bg: 248 250 252;
+    --section-bg: 255 255 255;
+    --section-alt-bg: 249 250 251;
+    --glass-bg: 255 255 255 / 0.8;
+    --glass-border: 255 255 255 / 0.2;
   }
 
   .dark {
@@ -64,6 +73,15 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
+
+    /* Custom dark theme colors */
+    --nav-bg: 17 24 39;
+    --nav-border: 55 65 81;
+    --hero-bg: 17 24 39;
+    --section-bg: 17 24 39;
+    --section-alt-bg: 31 41 55;
+    --glass-bg: 17 24 39 / 0.8;
+    --glass-border: 255 255 255 / 0.1;
   }
 }
 
@@ -73,9 +91,70 @@
     /* Remove the border-border class and replace with a standard border utility */
     @apply border-neutral-200 dark:border-neutral-700;
   }
+
+  html {
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: "Inter", sans-serif;
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Enhanced smooth transitions for all color-based properties */
+  * {
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      fill 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      stroke 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Enhanced theme transition class */
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *:before,
+  .theme-transition *:after {
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition-property: background-color, border-color, color, box-shadow, fill,
+      stroke !important;
+    transition-duration: 0.4s !important;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  /* Preserve specific transitions that should not be overridden */
+  .no-color-transition {
+    transition: none !important;
+  }
+
+  /* Enhanced gradient backgrounds for sections */
+  .hero-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--hero-bg)) 0%,
+      hsl(220 26% 98%) 50%,
+      hsl(var(--hero-bg)) 100%
+    );
+  }
+
+  .dark .hero-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--hero-bg)) 0%,
+      hsl(220 26% 18%) 50%,
+      hsl(var(--hero-bg)) 100%
+    );
+  }
+
+  /* Glass morphism effects */
+  .glass-effect {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--glass-border));
   }
 }
 
@@ -113,6 +192,50 @@
   }
 }
 
+/* Theme transition animations */
+@keyframes themeTransition {
+  from {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.theme-switching {
+  animation: themeTransition 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced hover effects for dark mode */
+.theme-aware-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-aware-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .theme-aware-hover:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Glow effects for dark mode */
+.dark-glow {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.dark .dark-glow {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+}
+
+/* Enhanced toggle button effects */
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-stops));
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .h1-responsive {
@@ -130,3 +253,62 @@
 
 /* Import tw-animate-css after Tailwind */
 @import "tw-animate-css";
+
+/* Animation delay utilities */
+.animation-delay-200 {
+  animation-delay: 200ms !important;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms !important;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms !important;
+}
+
+.animation-delay-500 {
+  animation-delay: 500ms !important;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms !important;
+}
+
+.animation-delay-700 {
+  animation-delay: 700ms !important;
+}
+
+.animation-delay-800 {
+  animation-delay: 800ms !important;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1000ms !important;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2000ms !important;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4000ms !important;
+}
+
+/* Background grid pattern */
+.bg-grid-pattern {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 0
+  );
+  background-size: 20px 20px;
+}
+
+.dark .bg-grid-pattern {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(255, 255, 255, 0.1) 1px,
+    transparent 0
+  );
+}

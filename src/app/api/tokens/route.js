@@ -24,11 +24,10 @@ export async function GET(request) {
       .limit(limit)
       .lean();
 
-    return NextResponse.json({
-      success: true,
-      tokens,
-      timestamp: Date.now(), // Return current timestamp for next polling request
-    });
+    console.log(`[API] Found ${tokens.length} tokens in database`);
+
+    // Return just the tokens array for backward compatibility
+    return NextResponse.json(tokens);
   } catch (error) {
     console.error("Error fetching tokens:", error);
     return NextResponse.json(

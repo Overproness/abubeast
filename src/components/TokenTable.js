@@ -1,6 +1,6 @@
 import { formatCurrency, formatLargeNumber } from "@/lib/utils/tokenEnrichment";
 
-export default function TokenTable({ tokens }) {
+export default function TokenTable({ tokens, onTokenClick }) {
   if (!tokens || tokens.length === 0) {
     return null;
   }
@@ -10,6 +10,15 @@ export default function TokenTable({ tokens }) {
     if (!dateStr) return "N/A";
     const date = new Date(dateStr);
     return date.toLocaleDateString();
+  };
+
+  const handleTokenClick = (token) => {
+    if (onTokenClick) {
+      // Use either address or mint_address based on what's available
+      const tokenAddress = token.address || token.mint_address;
+      const chain = token.chain || "solana";
+      onTokenClick(tokenAddress, chain);
+    }
   };
 
   return (
@@ -52,11 +61,9 @@ export default function TokenTable({ tokens }) {
         <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
           {tokens.map((token) => (
             <tr
-              key={token.mint_address}
-              className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
-              onClick={() =>
-                (window.location.href = `/token/${token.mint_address}`)
-              }
+              key={token.mint_address || token.address}
+              className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+              onClick={() => handleTokenClick(token)}
             >
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">
