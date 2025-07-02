@@ -1,10 +1,8 @@
 import {
   comparePassword,
-  generateToken,
   getUserByEmail,
 } from "@/lib/auth/auth";
 import { cors } from "@/lib/middlewares/cors";
-import { serialize } from "cookie";
 import { NextResponse } from "next/server";
 
 // Specify Node.js runtime
@@ -45,35 +43,19 @@ export async function POST(request) {
       );
     }
 
-    // Generate JWT token
-    const token = await generateToken(user);
+    console.log(
+      "[API] Login - Password verified for user:",
+      user._id.toString(),
+      "- awaiting OTP verification"
+    );
 
-    // Set HTTP-only cookie with more permissive settings for debugging
-    const cookie = serialize("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 1 week
-      path: "/",
+    // Return success but don't set auth token yet - wait for OTP verification
+    return NextResponse.json({
+      success: true,
+      message: "Credentials verified. Please verify OTP to complete login.",
+      user: { id: user._id.toString(), email: user.email, name: user.name },
     });
 
-    console.log(
-      "[API] Login - Setting auth cookie for user:",
-      user._id.toString()
-    );
-
-    // Return token and user info
-    return NextResponse.json(
-      {
-        success: true,
-        user: { id: user._id.toString(), email: user.email, name: user.name },
-      },
-      {
-        headers: {
-          "Set-Cookie": cookie,
-        },
-      }
-    );
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(

@@ -34,17 +34,18 @@ const AuthContext = createContext({
   user: null,
   loading: true,
   authChecked: false,
-  login: async () => {},
-  logout: async () => {},
-  signup: async () => {},
-  checkAuth: async () => {},
+  login: async () => { },
+  logout: async () => { },
+  signup: async () => { },
+  checkAuth: async () => { },
+  verifyOTP: async () => { },
   isAuthenticated: false,
-  connectWallet: async () => {},
-  disconnectWallet: async () => {},
+  connectWallet: async () => { },
+  disconnectWallet: async () => { },
   walletInfo: null,
   tradingPermissions: [],
-  fetchTradingPermissions: async () => {},
-  revokeTradingPermission: async () => {},
+  fetchTradingPermissions: async () => { },
+  revokeTradingPermission: async () => { },
 });
 
 // Auth provider component
@@ -285,20 +286,9 @@ export function AuthProvider({ children }) {
         throw new Error(data.error || "Login failed");
       }
 
-      console.log("[Auth] Login successful");
-      setUser(data.user);
-      setIsAuthenticated(true);
+      console.log("[Auth] Password verified, awaiting OTP verification");
 
-      // Store in localStorage as fallback
-      localStorage.setItem(
-        AUTH_STORAGE_KEY,
-        JSON.stringify({
-          user: data.user,
-          timestamp: Date.now(),
-        })
-      );
-
-      setAuthChecked(true);
+      // Don't set user or authentication state yet - wait for OTP
       setLoading(false);
       return { success: true, user: data.user };
     } catch (error) {
@@ -360,6 +350,53 @@ export function AuthProvider({ children }) {
       return { success: true };
     } catch (error) {
       console.error("[Auth] Signup error:", error.message);
+      return { success: false, error: error.message };
+    }
+  };
+
+  // OTP verification function
+  const verifyOTP = async (email, otp) => {
+    setLoading(true);
+
+    try {
+      console.log("[Auth] Verifying OTP for:", email);
+
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, otp }),
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "OTP verification failed");
+      }
+
+      console.log("[Auth] OTP verified successfully - user now authenticated");
+
+      // Now set the user and authentication state
+      setUser(data.user);
+      setIsAuthenticated(true);
+
+      // Store in localStorage as fallback
+      localStorage.setItem(
+        AUTH_STORAGE_KEY,
+        JSON.stringify({
+          user: data.user,
+          timestamp: Date.now(),
+        })
+      );
+
+      setAuthChecked(true);
+      setLoading(false);
+      return { success: true, message: data.message };
+    } catch (error) {
+      console.error("[Auth] OTP verification error:", error.message);
+      setLoading(false);
       return { success: false, error: error.message };
     }
   };
@@ -646,6 +683,7 @@ export function AuthProvider({ children }) {
     signup,
     logout,
     checkAuth,
+    verifyOTP,
     isAuthenticated,
     connectWallet,
     disconnectWallet: disconnectWalletHandler,
@@ -660,3 +698,4 @@ export function AuthProvider({ children }) {
 
 // Custom hook to use auth context
 export const useAuth = () => useContext(AuthContext);
+// export const useAuth = () => useContext(AuthContext);
