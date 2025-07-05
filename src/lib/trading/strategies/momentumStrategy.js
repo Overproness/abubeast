@@ -21,6 +21,11 @@ export class MomentumStrategy {
      */
     async analyzeToken(tokenData) {
         try {
+            // Validate input
+            if (!tokenData) {
+                throw new Error('Invalid token data: tokenData is null or undefined');
+            }
+
             const analysis = {
                 token: tokenData,
                 timestamp: Date.now(),
@@ -191,21 +196,21 @@ export class MomentumStrategy {
 
             // Check buy conditions
             if (analysis.momentum >= this.buyThreshold) {
-                if (analysis.rsi < 70 && analysis.volumeMomentum > 0.3) {
+                if (analysis.confidence > 0.6 && analysis.volumeMomentum > 0.5) {
                     recommendation.action = 'BUY';
-                    recommendation.reason = `Strong upward momentum (${Math.round(analysis.momentum * 100)}%)`;
-                } else if (analysis.rsi >= 70) {
-                    recommendation.action = 'HOLD';
-                    recommendation.reason = 'Positive momentum but RSI overbought';
-                } else {
+                    recommendation.reason = 'Strong momentum with high volume';
+                } else if (analysis.confidence > 0.3) {
                     recommendation.action = 'BUY_SMALL';
-                    recommendation.reason = 'Moderate momentum with low volume';
+                    recommendation.reason = 'Moderate momentum detected';
+                } else {
+                    recommendation.action = 'HOLD';
+                    recommendation.reason = 'Weak momentum signal';
                 }
             }
             // Check sell/avoid conditions
             else if (analysis.momentum <= -this.sellThreshold) {
                 recommendation.action = 'AVOID';
-                recommendation.reason = `Strong downward momentum (${Math.round(analysis.momentum * 100)}%)`;
+                recommendation.reason = 'Negative momentum detected';
             }
             // Check for sideways momentum
             else if (Math.abs(analysis.momentum) < 0.01) {
@@ -215,15 +220,17 @@ export class MomentumStrategy {
 
             // Adjust confidence based on supporting indicators
             if (recommendation.action === 'BUY' || recommendation.action === 'BUY_SMALL') {
+                if (analysis.rsi > 70) {
+                    recommendation.confidence *= 0.8; // Reduce confidence for overbought
+                    recommendation.reason += ' (but RSI overbought)';
+                } else if (analysis.rsi < 30) {
+                    recommendation.confidence *= 1.2; // Increase confidence for oversold
+                    recommendation.reason += ' (RSI oversold - good entry)';
+                }
+
                 // Boost confidence if multiple indicators align
                 if (analysis.priceVelocity > 0 && analysis.volumeMomentum > 0.5) {
                     recommendation.confidence = Math.min(1, recommendation.confidence * 1.2);
-                }
-
-                // Reduce confidence if RSI is extreme
-                if (analysis.rsi > 80) {
-                    recommendation.confidence *= 0.8;
-                    recommendation.reason += ' (RSI warning)';
                 }
             }
 

@@ -3,6 +3,8 @@
  * Tests for technical momentum analysis strategy
  */
 
+import { MomentumStrategy } from '../../../src/lib/trading/strategies/momentumStrategy.js';
+
 // Mock the dependencies
 jest.mock('../../../src/lib/trading/config.js', () => ({
     TRADING_STRATEGIES: {
@@ -294,7 +296,7 @@ describe('MomentumStrategy', () => {
     let mockTokenData;
 
     beforeEach(() => {
-        strategy = new MockMomentumStrategy();
+        strategy = new MomentumStrategy();
         mockTokenData = {
             mint_address: 'So11111111111111111111111111111111111111112',
             name: 'Test Momentum Token',
@@ -697,6 +699,9 @@ describe('MomentumStrategy', () => {
                 };
 
                 const analysis = await strategy.analyzeToken(testToken);
+
+                console.log(`Scenario: change_24h=${scenario.change_24h}, expected=${scenario.expected}, actual=${analysis.recommendation.action}`);
+                console.log(`  Momentum: ${analysis.momentum}, Confidence: ${analysis.confidence}, Volume: ${analysis.volumeMomentum}`);
 
                 if (scenario.expected === 'BUY') {
                     expect(['BUY', 'BUY_SMALL']).toContain(analysis.recommendation.action);

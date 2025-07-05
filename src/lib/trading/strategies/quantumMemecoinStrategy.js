@@ -38,50 +38,89 @@ export class QuantumMemecoinStrategy {
             };
 
             // Quantum Engine Analysis
-            const quantumAnalysis = await this.quantumEngine.analyzeMarketState(tokenData);
-            analysis.signals.quantum = {
-                score: quantumAnalysis.quantumScore,
-                coherence: quantumAnalysis.coherenceLevel,
-                momentum: quantumAnalysis.quantumMomentum,
-                probability: quantumAnalysis.probabilityUp
-            };
+            try {
+                const quantumAnalysis = await this.quantumEngine.analyzeMarketState(tokenData);
+                analysis.signals.quantum = {
+                    score: quantumAnalysis.quantumScore,
+                    coherence: quantumAnalysis.coherenceLevel,
+                    momentum: quantumAnalysis.quantumMomentum,
+                    probability: quantumAnalysis.probabilityUp
+                };
+            } catch (error) {
+                console.warn('[QuantumMemecoinStrategy] Quantum analysis failed:', error.message);
+                analysis.signals.quantum = {
+                    score: 0.5,
+                    coherence: 0.5,
+                    momentum: 0.5,
+                    probability: 0.5
+                };
+            }
 
             // Social Sentiment Analysis
-            const sentimentAnalysis = await this.socialAnalyzer.analyzeSentiment(tokenData);
-            analysis.signals.social = {
-                overallScore: sentimentAnalysis.overallScore,
-                platforms: {
-                    twitter: sentimentAnalysis.twitterScore,
-                    telegram: sentimentAnalysis.telegramScore,
-                    reddit: sentimentAnalysis.redditScore
-                },
-                volume: sentimentAnalysis.volume,
-                trending: sentimentAnalysis.trending,
-                influencerMentions: sentimentAnalysis.influencerMentions
-            };
+            try {
+                const sentimentAnalysis = await this.socialAnalyzer.analyzeSentiment(tokenData);
+                analysis.signals.social = {
+                    overallScore: sentimentAnalysis.overallScore,
+                    platforms: {
+                        twitter: sentimentAnalysis.twitterScore,
+                        telegram: sentimentAnalysis.telegramScore,
+                        reddit: sentimentAnalysis.redditScore
+                    },
+                    volume: sentimentAnalysis.volume,
+                    trending: sentimentAnalysis.trending,
+                    influencerMentions: sentimentAnalysis.influencerMentions
+                };
+            } catch (error) {
+                console.warn('[QuantumMemecoinStrategy] Social analysis failed:', error.message);
+                analysis.signals.social = {
+                    overallScore: 0.5,
+                    platforms: { twitter: 0.5, telegram: 0.5, reddit: 0.5 },
+                    volume: 0,
+                    trending: false,
+                    influencerMentions: 0
+                };
+            }
 
             // Contract Security Analysis
-            const securityAnalysis = tokenData.mint_address ?
-                await this.securityAnalyzer.analyzeSecurity(tokenData.mint_address) :
-                { overallScore: 0, liquidity: 0, ownership: 0, trading: 0, risks: ['Invalid mint address'] };
+            try {
+                const securityAnalysis = tokenData?.mint_address ?
+                    await this.securityAnalyzer.analyzeSecurity(tokenData.mint_address) :
+                    { overallScore: 0, liquidity: 0, ownership: 0, trading: 0, risks: ['Invalid mint address'] };
 
-            analysis.signals.security = {
-                overallScore: securityAnalysis.overallScore,
-                breakdown: {
-                    liquidity: securityAnalysis.liquidity,
-                    ownership: securityAnalysis.ownership,
-                    trading: securityAnalysis.trading
-                },
-                risks: securityAnalysis.risks
-            };
+                analysis.signals.security = {
+                    overallScore: securityAnalysis.overallScore,
+                    breakdown: {
+                        liquidity: securityAnalysis.liquidity,
+                        ownership: securityAnalysis.ownership,
+                        trading: securityAnalysis.trading
+                    },
+                    risks: securityAnalysis.risks
+                };
+            } catch (error) {
+                console.warn('[QuantumMemecoinStrategy] Security analysis failed:', error.message);
+                analysis.signals.security = {
+                    overallScore: 50,
+                    breakdown: { liquidity: 50, ownership: 50, trading: 50 },
+                    risks: ['Security analysis unavailable']
+                };
+            }
 
             // Risk Assessment
-            const riskAnalysis = await this.riskManager.assessRisk(tokenData);
-            analysis.signals.risk = {
-                overallRisk: riskAnalysis.overallRisk,
-                riskLevel: riskAnalysis.riskLevel,
-                factors: riskAnalysis.factors
-            };
+            try {
+                const riskAnalysis = await this.riskManager.assessRisk(tokenData);
+                analysis.signals.risk = {
+                    overallRisk: riskAnalysis.overallRisk,
+                    riskLevel: riskAnalysis.riskLevel,
+                    factors: riskAnalysis.factors
+                };
+            } catch (error) {
+                console.warn('[QuantumMemecoinStrategy] Risk analysis failed:', error.message);
+                analysis.signals.risk = {
+                    overallRisk: 50,
+                    riskLevel: 'MEDIUM',
+                    factors: ['Risk analysis unavailable']
+                };
+            }
 
             // Combined Scoring System
             const combinedScore = this.calculateCombinedScore(analysis.signals);
@@ -108,7 +147,7 @@ export class QuantumMemecoinStrategy {
                 token: tokenData,
                 error: error.message,
                 confidence: 0,
-                recommendation: { action: 'AVOID', reason: 'Analysis failed' }
+                recommendation: { action: 'AVOID', reason: 'Analysis failed', reasoning: 'Analysis failed' }
             };
         }
     }
@@ -140,14 +179,27 @@ export class QuantumMemecoinStrategy {
 
         // Security Score (0-100, normalize to 0-1)
         if (signals.security && signals.security.overallScore >= 0) {
-            totalScore += (signals.security.overallScore / 100) * weights.security;
+            const normalizedSecurityScore = signals.security.overallScore / 100;
+            totalScore += normalizedSecurityScore * weights.security;
             totalWeight += weights.security;
         }
 
         const confidence = totalWeight > 0 ? totalScore / totalWeight : 0;
 
+        // Apply additional penalties for low security or high risk
+        let adjustedConfidence = confidence;
+
+        // Reduce confidence significantly for low security scores
+        if (signals.security && signals.security.overallScore < 70) {
+            adjustedConfidence *= 0.5;
+        }
+
+        // Apply coherence adjustment for quantum signals
+        const coherence = signals.quantum?.coherence || 0.5;
+        adjustedConfidence *= coherence;
+
         return {
-            confidence,
+            confidence: Math.max(0, Math.min(1, adjustedConfidence)),
             breakdown: {
                 quantum: signals.quantum?.score || 0,
                 social: signals.social?.overallScore || 0,
@@ -225,13 +277,25 @@ export class QuantumMemecoinStrategy {
         const minConfidence = this.config.minConfidence; // 0.7
         const securityScore = analysis.signals.security?.overallScore || 0;
         const quantumProbability = analysis.signals.quantum?.probability || 0.5;
+        const riskLevel = analysis.signals.risk?.riskLevel || 'UNKNOWN';
 
         // Security check - must pass minimum security
         if (securityScore < 85) {
             return {
                 action: 'AVOID',
                 reason: 'Security score too low',
+                reasoning: 'Security score too low',
                 confidence: 0
+            };
+        }
+
+        // Risk level check - avoid high risk scenarios
+        if (riskLevel === 'HIGH') {
+            return {
+                action: 'AVOID',
+                reason: 'High risk detected',
+                reasoning: 'High risk detected',
+                confidence: confidence
             };
         }
 
@@ -240,6 +304,7 @@ export class QuantumMemecoinStrategy {
             return {
                 action: 'HOLD',
                 reason: 'Confidence below threshold',
+                reasoning: 'Confidence below threshold',
                 confidence: confidence
             };
         }
@@ -249,25 +314,25 @@ export class QuantumMemecoinStrategy {
             return {
                 action: 'BUY',
                 reason: 'Strong quantum signals detected',
+                reasoning: 'Strong quantum signals detected',
                 confidence: confidence,
-                positionSize: analysis.positionSize,
+                positionSize: analysis.positionSize.solAmount,
                 slippage: analysis.slippage
             };
         } else if (quantumProbability > 0.5) {
             return {
                 action: 'BUY_SMALL',
                 reason: 'Moderate quantum signals',
+                reasoning: 'Moderate quantum signals',
                 confidence: confidence,
-                positionSize: {
-                    ...analysis.positionSize,
-                    solAmount: analysis.positionSize.solAmount * 0.5
-                },
+                positionSize: analysis.positionSize.solAmount * 0.5,
                 slippage: analysis.slippage
             };
         } else {
             return {
                 action: 'AVOID',
                 reason: 'Weak quantum signals',
+                reasoning: 'Weak quantum signals',
                 confidence: confidence
             };
         }

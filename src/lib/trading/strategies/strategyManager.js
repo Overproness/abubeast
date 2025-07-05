@@ -102,6 +102,26 @@ export class StrategyManager {
             // Calculate consensus recommendation
             analysis.consensus = this.calculateConsensus(analysis.strategyResults);
             analysis.confidence = analysis.consensus.confidence;
+
+            // Add risk assessment if risk manager is available
+            if (this.riskManager) {
+                try {
+                    analysis.riskAssessment = await this.riskManager.assessRisk(tokenData);
+
+                    // Apply risk override - if risk is not approved, force AVOID
+                    if (analysis.riskAssessment && !analysis.riskAssessment.approved) {
+                        analysis.consensus.action = 'AVOID';
+                        analysis.consensus.confidence = Math.min(analysis.consensus.confidence, 0.3);
+                        analysis.consensus.reasoning = 'Risk assessment override: High risk detected';
+                    }
+                } catch (error) {
+                    console.error('[StrategyManager] Risk assessment failed:', error);
+                    analysis.riskAssessment = { approved: true, riskScore: 0, error: error.message };
+                }
+            } else {
+                analysis.riskAssessment = { approved: true, riskScore: 25 };
+            }
+
             analysis.recommendation = this.generateFinalRecommendation(analysis, userSettings);
 
             return analysis;
@@ -429,6 +449,14 @@ export class StrategyManager {
      */
     getActiveStrategies() {
         return Array.from(this.activeStrategies);
+    }
+
+    /**
+     * Build consensus (legacy method for backward compatibility)
+     * @deprecated Use calculateConsensus instead
+     */
+    buildConsensus(strategies) {
+        return this.calculateConsensus(strategies);
     }
 }
 

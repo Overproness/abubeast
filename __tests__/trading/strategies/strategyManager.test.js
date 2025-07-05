@@ -3,6 +3,8 @@
  * Unit tests for the strategy coordination and consensus system
  */
 
+import { StrategyManager } from '../../../src/lib/trading/strategies/strategyManager.js';
+
 // Create a mock StrategyManager class
 class MockStrategyManager {
     constructor() {
@@ -57,14 +59,22 @@ class MockStrategyManager {
             }
 
             const consensus = this.buildConsensus(strategies);
+            const riskAssessment = this.riskManager ?
+                await this.riskManager.assessRisk(tokenData) :
+                { approved: true, riskScore: 25 };
+
+            // Apply risk override - if risk is not approved, force AVOID
+            if (riskAssessment && !riskAssessment.approved) {
+                consensus.action = 'AVOID';
+                consensus.confidence = Math.min(consensus.confidence, 0.3);
+                consensus.reasoning = 'Risk assessment override: High risk detected';
+            }
 
             return {
                 consensus,
                 strategies,
                 timestamp: Date.now(),
-                riskAssessment: this.riskManager ?
-                    await this.riskManager.assessRisk(tokenData) :
-                    { approved: true, riskScore: 25 }
+                riskAssessment
             };
         } catch (error) {
             return {
@@ -86,23 +96,30 @@ class MockStrategyManager {
         const actions = validStrategies.map(s => s.recommendation.action);
         const confidences = validStrategies.map(s => s.recommendation.confidence);
 
-        // Count action votes
-        const actionCounts = actions.reduce((acc, action) => {
-            acc[action] = (acc[action] || 0) + 1;
-            return acc;
-        }, {});
+        // Count action votes and their confidence weights
+        const actionData = {};
+        validStrategies.forEach(s => {
+            const action = s.recommendation.action;
+            if (!actionData[action]) {
+                actionData[action] = { count: 0, totalConfidence: 0, confidences: [] };
+            }
+            actionData[action].count++;
+            actionData[action].totalConfidence += s.recommendation.confidence;
+            actionData[action].confidences.push(s.recommendation.confidence);
+        });
 
         // Find most common action
-        const consensusAction = Object.keys(actionCounts).reduce((a, b) =>
-            actionCounts[a] > actionCounts[b] ? a : b
+        const consensusAction = Object.keys(actionData).reduce((a, b) =>
+            actionData[a].count > actionData[b].count ? a : b
         );
 
-        // Calculate weighted confidence
-        const avgConfidence = confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length;
+        // Calculate confidence based on strategies that agree with consensus
+        const consensusData = actionData[consensusAction];
+        const consensusConfidence = consensusData.totalConfidence / consensusData.count;
 
-        // Reduce confidence if there's disagreement
-        const agreementRatio = actionCounts[consensusAction] / validStrategies.length;
-        const adjustedConfidence = avgConfidence * agreementRatio;
+        // Apply agreement bonus - higher agreement = higher confidence
+        const agreementRatio = consensusData.count / validStrategies.length;
+        const adjustedConfidence = Math.min(1.0, consensusConfidence * (0.7 + 0.3 * agreementRatio));
 
         // Default to AVOID if confidence is too low
         if (adjustedConfidence < 0.5) {
@@ -112,7 +129,7 @@ class MockStrategyManager {
         return {
             action: consensusAction,
             confidence: adjustedConfidence,
-            reasoning: `${actionCounts[consensusAction]}/${validStrategies.length} strategies agree`
+            reasoning: `${consensusData.count}/${validStrategies.length} strategies agree`
         };
     }
 
