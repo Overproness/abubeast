@@ -1420,6 +1420,9 @@ describe('WhaleWatchStrategy', () => {
             ];
 
             for (const scenario of scenarios) {
+                // Clear cache between scenarios
+                strategy.whaleCache.clear();
+                
                 jest.spyOn(strategy, 'fetchWhaleTransactions').mockResolvedValueOnce(scenario.transactions);
 
                 const analysis = await strategy.analyzeToken(mockTokenData);

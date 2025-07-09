@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, Suspense } from "react";
-import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 function OTPPageContent() {
   const [otp, setOtp] = useState("");

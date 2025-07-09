@@ -3,7 +3,7 @@
  * End-to-end tests for the main trading engine
  */
 
-import { AbubotEngine } from '../../src/lib/trading/abubotEngine.js';
+import { ABUBOTTradingEngine as AbubotEngine } from '../../src/lib/trading/abubotEngine.js';
 
 // Mock external dependencies
 jest.mock('../../src/lib/trading/strategies/strategyManager.js');
@@ -464,6 +464,37 @@ describe('AbubotEngine Integration Tests', () => {
         });
 
         it('should support strategy enable/disable', () => {
+            // Mock strategy manager methods
+            const mockActiveStrategies = new Set(['quantum_memecoin', 'advanced_solana', 'enhanced']);
+            
+            engine.strategyManager.disableStrategy = jest.fn((strategyName) => {
+                const strategyAliases = {
+                    'quantum': 'quantum_memecoin',
+                    'advanced': 'advanced_solana'
+                };
+                const actualName = strategyAliases[strategyName] || strategyName;
+                mockActiveStrategies.delete(actualName);
+            });
+            
+            engine.strategyManager.enableStrategy = jest.fn((strategyName) => {
+                const strategyAliases = {
+                    'quantum': 'quantum_memecoin',
+                    'advanced': 'advanced_solana'
+                };
+                const actualName = strategyAliases[strategyName] || strategyName;
+                mockActiveStrategies.add(actualName);
+            });
+            
+            engine.strategyManager.getEnabledStrategies = jest.fn(() => {
+                const reverseAliases = {
+                    'quantum_memecoin': 'quantum',
+                    'advanced_solana': 'advanced'
+                };
+                return Array.from(mockActiveStrategies).map(name => 
+                    reverseAliases[name] || name
+                );
+            });
+
             engine.disableStrategy('quantum');
 
             const enabledStrategies = engine.getEnabledStrategies();

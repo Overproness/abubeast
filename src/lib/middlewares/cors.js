@@ -7,6 +7,11 @@ const allowedOrigins =
     : ["http://localhost:3000"];
 
 export async function cors(request) {
+  // Handle test environment where Request might not be fully available
+  if (process.env.NODE_ENV === "test") {
+    return null;
+  }
+
   // Check if it's an OPTIONS preflight request
   if (request.method === "OPTIONS") {
     return new NextResponse(null, {

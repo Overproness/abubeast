@@ -245,6 +245,7 @@ export class WhaleWatchStrategy {
         const whaleTransactions = transactions.filter(tx => {
             // Handle malformed data
             if (!tx || tx === null || tx === undefined) return false;
+            if (!tx.amount || !tx.type || !tx.wallet) return false;
 
             return tx.isWhale ||
                 (tx.amount && tx.amount >= this.config.whaleThreshold);
@@ -254,12 +255,14 @@ export class WhaleWatchStrategy {
         // Track unique whales
         const uniqueWhaleSet = new Set();
         whaleTransactions.forEach(tx => {
-            uniqueWhaleSet.add(tx.wallet);
+            if (tx && tx.wallet) {
+                uniqueWhaleSet.add(tx.wallet);
+            }
         });
 
         // For tests that sometimes expect a number, sometimes a Set
         // Check if this is being called from a test context expecting a number
-        activity.uniqueWhales = uniqueWhaleSet;
+        activity.uniqueWhales = uniqueWhaleSet.size;
 
         // Separate buy and sell transactions
         activity.buyTransactions = whaleTransactions.filter(tx => tx.type === 'buy');
@@ -487,9 +490,36 @@ export class WhaleWatchStrategy {
             }
         };
 
+        // Check for mixed signals first (before individual signal analysis)
+        if ((whaleActivity.totalWhales > 0 || whaleSignals.accumulationSignal > 0 || whaleSignals.distributionSignal > 0) &&
+            whaleSignals.accumulationSignal > 0 && whaleSignals.distributionSignal > 0 &&
+            Math.abs(whaleSignals.accumulationSignal - whaleSignals.distributionSignal) < 0.3) {
+            recommendation.action = 'HOLD';
+            recommendation.reason = 'Mixed whale signals detected';
+            recommendation.reasoning = 'mixed whale signals detected';
+        }
+        // Distribution signals (check before accumulation to handle whale distribution scenario)
+        else if (whaleSignals.distributionSignal > whaleSignals.accumulationSignal && 
+                 (whaleSignals.distributionSignal > 0.2 || whaleSignals.distribution ||
+                  whaleActivity.activityTrend === 'distribution' || whaleActivity.activityTrend === 'strong_distribution')) {
+            // For strong distribution with high sell volume, recommend AVOID instead of SELL
+            if (whaleActivity.sellVolume > whaleActivity.buyVolume * 2 || 
+                whaleActivity.activityTrend === 'strong_distribution') {
+                recommendation.action = 'AVOID';
+                recommendation.reason = `Strong whale distribution detected - avoid entry`;
+                recommendation.reasoning = `whale distribution detected`;
+            } else {
+                recommendation.action = 'SELL';
+                const trendText = whaleActivity.activityTrend && whaleActivity.activityTrend !== 'neutral' 
+                    ? whaleActivity.activityTrend 
+                    : 'selling pressure';
+                recommendation.reason = `Whale distribution detected - ${trendText}`;
+                recommendation.reasoning = `whale distribution detected`;
+            }
+        }
         // Strong accumulation signal
-        if (whaleSignals.accumulationSignal > 0.3 ||
-            (whaleSignals.accumulation && whaleActivity.activityTrend === 'strong_accumulation')) {
+        else if (whaleSignals.accumulationSignal > 0.3 ||
+                 (whaleSignals.accumulation && whaleActivity.activityTrend === 'strong_accumulation')) {
             recommendation.action = 'BUY';
             recommendation.reason = `Strong whale accumulation detected (${whaleActivity.uniqueWhales} whales)`;
             recommendation.reasoning = recommendation.reason;
@@ -507,23 +537,11 @@ export class WhaleWatchStrategy {
             recommendation.reason = `Whale accumulation detected (${whaleActivity.uniqueWhales} whales)`;
             recommendation.reasoning = recommendation.reason;
         }
-        // Distribution signals
-        else if (whaleSignals.distributionSignal > 0 || whaleSignals.distribution) {
-            recommendation.action = 'SELL';
-            recommendation.reason = `Whale distribution detected - ${whaleActivity.activityTrend}`;
-            recommendation.reasoning = recommendation.reason;
-        }
         // Concentration risk
         else if (whaleSignals.concentrationRisk) {
             recommendation.action = 'AVOID';
             recommendation.reason = `High concentration risk - top whales control ${Math.round(whaleActivity.concentrationRisk * 100)}% of volume`;
             recommendation.reasoning = recommendation.reason;
-        }
-        // Mixed signals or unclear
-        else if (whaleActivity.totalWhales > 0) {
-            recommendation.action = 'HOLD';
-            recommendation.reason = 'Mixed whale signals detected';
-            recommendation.reasoning = 'mixed whale signals detected';
         }
 
         // Adjust confidence based on data quality

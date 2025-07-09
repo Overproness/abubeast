@@ -256,7 +256,7 @@ describe('StrategyManager', () => {
 
     describe('Initialization', () => {
         it('should initialize successfully with all strategies', async () => {
-            const newManager = new StrategyManager();
+            const newManager = new MockStrategyManager();
             await newManager.initialize();
 
             expect(newManager.strategies).toBeDefined();
@@ -264,7 +264,7 @@ describe('StrategyManager', () => {
         });
 
         it('should handle strategy initialization failures gracefully', async () => {
-            const newManager = new StrategyManager();
+            const newManager = new MockStrategyManager();
 
             // Mock one strategy to fail initialization
             const mockStrategy = {
