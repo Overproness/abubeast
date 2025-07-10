@@ -1,7 +1,9 @@
 "use client";
 
+import { getZIndexClass } from "@/lib/utils/zIndexLayers";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function WalletConnectModal({ isOpen, onClose, onConnect }) {
   const [connecting, setConnecting] = useState(false);
@@ -12,7 +14,26 @@ export default function WalletConnectModal({ isOpen, onClose, onConnect }) {
     if (isOpen) {
       setError(null);
     }
-  }, [isOpen]);
+
+    // Add keyboard event listener for ESC key
+    const handleEscape = (event) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      // Restore body scroll when modal is closed
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
 
   const handleConnect = async () => {
     setError(null);
@@ -38,9 +59,17 @@ export default function WalletConnectModal({ isOpen, onClose, onConnect }) {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6">
+  const modalContent = (
+    <div 
+      className={`fixed inset-0 ${getZIndexClass('WALLET_CONNECT_MODAL')} flex items-center justify-center bg-black/60 backdrop-blur-sm`}
+      onClick={(e) => {
+        // Close modal when clicking on backdrop
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-md p-6 m-4 relative">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">
             Connect with WalletConnect
@@ -125,4 +154,7 @@ export default function WalletConnectModal({ isOpen, onClose, onConnect }) {
       </div>
     </div>
   );
+
+  // Use portal to render at document root level to ensure it appears above everything
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : null;
 }

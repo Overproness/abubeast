@@ -1,5 +1,6 @@
 "use client";
 
+import { getZIndexClass } from "@/lib/utils/zIndexLayers";
 import { useEffect, useState } from "react";
 
 export default function SplashScreen({ onComplete, minDisplayTime = 2000 }) {
@@ -39,7 +40,7 @@ export default function SplashScreen({ onComplete, minDisplayTime = 2000 }) {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center overflow-hidden">
+    <div className={`fixed inset-0 ${getZIndexClass('SPLASH_SCREEN')} bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center overflow-hidden`}>
       {/* Animated background grid */}
       <div className="absolute inset-0 opacity-20">
         <div

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTheme } from "@/context/ThemeContext";
+import { getZIndexClass } from "@/lib/utils/zIndexLayers";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -44,7 +45,7 @@ export default function DexScreenerChart({
   const embedUrl = `https://dexscreener.com/${chain}/${pairAddress}?embed=1&loadChartSettings=0&chartDefaultOnMobile=1&chartTheme=${chartTheme}&theme=${chartTheme}&chartStyle=1&chartType=usd&interval=15`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className={`fixed inset-0 ${getZIndexClass('CHART_MODAL')} flex items-center justify-center`}>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
