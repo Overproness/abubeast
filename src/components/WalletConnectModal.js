@@ -48,8 +48,7 @@ export default function WalletConnectModal({ isOpen, onClose, onConnect }) {
     } catch (err) {
       console.error("WalletConnectModal: Connection error:", err);
       setError(
-        `Failed to connect with WalletConnect: ${
-          err.message || "Unknown error"
+        `Failed to connect with WalletConnect: ${err.message || "Unknown error"
         }`
       );
     } finally {
@@ -60,7 +59,7 @@ export default function WalletConnectModal({ isOpen, onClose, onConnect }) {
   if (!isOpen) return null;
 
   const modalContent = (
-    <div 
+    <div
       className={`fixed inset-0 ${getZIndexClass('WALLET_CONNECT_MODAL')} flex items-center justify-center bg-black/60 backdrop-blur-sm`}
       onClick={(e) => {
         // Close modal when clicking on backdrop

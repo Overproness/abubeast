@@ -293,7 +293,7 @@ export default function WalletConnect() {
           </button>
 
           {showWalletOptions && (
-            <WalletDropdown 
+            <WalletDropdown
               availableWallets={availableWallets}
               handleConnectWallet={handleConnectWallet}
               setShowWalletOptions={setShowWalletOptions}
@@ -363,7 +363,7 @@ function WalletDropdown({ availableWallets, handleConnectWallet, setShowWalletOp
   }, [setShowWalletOptions, buttonRef]);
 
   const dropdownContent = (
-    <div 
+    <div
       ref={dropdownRef}
       className={`fixed w-72 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 ${getZIndexClass('WALLET_DROPDOWN')}`}
       style={{
