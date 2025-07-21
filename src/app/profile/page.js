@@ -10,11 +10,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function ProfilePage() {
+export default function Page() {
   const { user, isAuthenticated, authChecked, logout, walletInfo } = useAuth();
   const router = useRouter();
   const [editMode, setEditMode] = useState(false);
-  const [profileData, setProfileData] = useState({
+  const [Data, setData] = useState({
     name: "",
     email: "",
     bio: "",
@@ -30,25 +30,78 @@ export default function ProfilePage() {
     },
   });
   const [saveStatus, setSaveStatus] = useState("");
+  const [userStats, setUserStats] = useState(null);
+  const [userAchievements, setUserAchievements] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [loadingStats, setLoadingStats] = useState(true);
 
   useEffect(() => {
     if (authChecked && !isAuthenticated) {
-      router.push("/auth/login?from=/profile");
+      router.push("/auth/login?from=/");
     } else if (user) {
-      setProfileData((prev) => ({
+      setData((prev) => ({
         ...prev,
         name: user.name || "",
         email: user.email || "",
+        bio: user.bio || "",
+        location: user.location || "",
+        website: user.website || "",
+        twitter: user.twitter || "",
+        telegram: user.telegram || "",
+        notifications: user.notifications || {
+          email: true,
+          trades: true,
+          security: true,
+          newsletter: false,
+        },
       }));
+
+      // Fetch user statistics
+      fetchUserStats();
     }
   }, [authChecked, isAuthenticated, router, user]);
+
+  const fetchUserStats = async () => {
+    if (!user?.id) return;
+
+    try {
+      setLoadingStats(true);
+      const response = await fetch(`/api/user/stats?userId=${user.id}`, {
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserStats(data.stats);
+        setUserAchievements(data.achievements);
+        setRecentActivity(data.recentActivity);
+
+        // Update profile data from API response
+        if (data.user) {
+          setData((prev) => ({
+            ...prev,
+            bio: data.user.bio || "",
+            location: data.user.location || "",
+            website: data.user.website || "",
+            twitter: data.user.twitter || "",
+            telegram: data.user.telegram || "",
+            notifications: data.user.notifications || prev.notifications,
+          }));
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch user stats:", error);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
 
     if (name.startsWith("notifications.")) {
       const notificationType = name.split(".")[1];
-      setProfileData((prev) => ({
+      setData((prev) => ({
         ...prev,
         notifications: {
           ...prev.notifications,
@@ -56,7 +109,7 @@ export default function ProfilePage() {
         },
       }));
     } else {
-      setProfileData((prev) => ({
+      setData((prev) => ({
         ...prev,
         [name]: type === "checkbox" ? checked : value,
       }));
@@ -66,12 +119,31 @@ export default function ProfilePage() {
   const handleSave = async () => {
     setSaveStatus("saving");
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setSaveStatus("success");
-      setEditMode(false);
-      setTimeout(() => setSaveStatus(""), 3000);
+      const response = await fetch(`/api/user/profile?userId=${user.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bio: Data.bio,
+          location: Data.location,
+          website: Data.website,
+          twitter: Data.twitter,
+          telegram: Data.telegram,
+          notifications: Data.notifications,
+        }),
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        setSaveStatus("success");
+        setEditMode(false);
+        setTimeout(() => setSaveStatus(""), 3000);
+      } else {
+        throw new Error("Failed to save profile");
+      }
     } catch (error) {
+      console.error("Error saving profile:", error);
       setSaveStatus("error");
       setTimeout(() => setSaveStatus(""), 3000);
     }
@@ -81,122 +153,47 @@ export default function ProfilePage() {
     return null;
   }
 
-  const stats = [
-    { label: "Total Trades", value: "247", change: "+12%", color: "blue" },
-    { label: "Win Rate", value: "78.4%", change: "+2.1%", color: "green" },
+  // Use real data from API or show loading/default states
+  const stats = userStats || [
+    { label: "Total Trades", value: "0", change: "+0%", color: "blue" },
+    { label: "Win Rate", value: "0%", change: "+0%", color: "green" },
     {
       label: "Total Volume",
-      value: "$52,847",
-      change: "+24%",
+      value: "$0",
+      change: "+0%",
       color: "purple",
     },
     {
       label: "Days Active",
-      value: "89",
+      value: "0",
       change: "consecutive",
       color: "orange",
-    },
-  ];
-
-  const achievements = [
-    {
-      title: "First Trade",
-      description: "Completed your first automated trade",
-      earned: true,
-      date: "2024-10-15",
-    },
-    {
-      title: "Profitable Week",
-      description: "7 consecutive days of profits",
-      earned: true,
-      date: "2024-11-01",
-    },
-    {
-      title: "High Roller",
-      description: "Single trade over $1,000",
-      earned: true,
-      date: "2024-11-10",
-    },
-    {
-      title: "Diamond Hands",
-      description: "Hold position for 30+ days",
-      earned: false,
-      progress: 18,
-    },
-    {
-      title: "Diversified",
-      description: "Trade 10+ different tokens",
-      earned: false,
-      progress: 7,
-    },
-    {
-      title: "Volume Trader",
-      description: "Reach $100K total volume",
-      earned: false,
-      progress: 52847,
-    },
-  ];
-
-  const recentActivity = [
-    {
-      type: "trade",
-      description: "Bought PEPE for $125.50",
-      time: "2 hours ago",
-      profit: "+$15.20",
-    },
-    {
-      type: "trade",
-      description: "Sold DOGE for $89.30",
-      time: "5 hours ago",
-      profit: "+$8.45",
-    },
-    {
-      type: "security",
-      description: "Login from new device",
-      time: "1 day ago",
-    },
-    {
-      type: "trade",
-      description: "Bought SHIB for $200.00",
-      time: "2 days ago",
-      profit: "-$12.30",
-    },
-    {
-      type: "system",
-      description: "Trading settings updated",
-      time: "3 days ago",
-    },
-    {
-      type: "trade",
-      description: "Sold BTC for $1,250.75",
-      time: "4 days ago",
-      profit: "+$125.30",
     },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20">
       <PageHeader
-        title="Your Profile"
+        title="Your "
         subtitle="Manage your account and track your progress"
         gradient={true}
         size="default"
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-        {/* Profile Header */}
+        {/*  Header */}
         <Card className="overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4 text-white">
                 <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold backdrop-blur-sm">
-                  {profileData.name.charAt(0).toUpperCase() || "U"}
+                  {Data.name.charAt(0).toUpperCase() || "U"}
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold">
-                    {profileData.name || "User"}
+                    {Data.name || "User"}
                   </h1>
-                  <p className="text-blue-100">{profileData.email}</p>
+                  <p className="text-blue-100">{Data.email}</p>
                   <div className="flex items-center mt-2">
                     <span className="bg-green-400 w-3 h-3 rounded-full mr-2"></span>
                     <span className="text-sm">Active Trader</span>
@@ -208,7 +205,7 @@ export default function ProfilePage() {
                 onClick={() => setEditMode(!editMode)}
                 className="bg-white/20 hover:bg-white/30 text-white border-white/30"
               >
-                {editMode ? "Cancel" : "Edit Profile"}
+                {editMode ? "Cancel" : "Edit "}
               </Button>
             </div>
           </div>
@@ -216,37 +213,59 @@ export default function ProfilePage() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
-            <Card
-              key={index}
-              className="text-center hover:shadow-lg transition-all duration-300"
-            >
-              <CardContent className="p-6">
-                <div
-                  className={`text-3xl font-bold text-${stat.color}-600 dark:text-${stat.color}-400 mb-2`}
-                >
-                  {stat.value}
-                </div>
-                <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                  {stat.label}
-                </div>
-                <div
-                  className={`text-xs text-${stat.color}-600 dark:text-${stat.color}-400`}
-                >
-                  {stat.change}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {loadingStats ? (
+            // Loading state for stats
+            Array.from({ length: 4 }).map((_, index) => (
+              <Card
+                key={index}
+                className="text-center hover:shadow-lg transition-all duration-300"
+              >
+                <CardContent className="p-6">
+                  <div className="text-3xl font-bold text-gray-400 dark:text-gray-600 mb-2 animate-pulse">
+                    ---
+                  </div>
+                  <div className="text-sm font-medium text-gray-400 dark:text-gray-600 mb-1 animate-pulse">
+                    Loading...
+                  </div>
+                  <div className="text-xs text-gray-400 dark:text-gray-600 animate-pulse">
+                    ---
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            stats.map((stat, index) => (
+              <Card
+                key={index}
+                className="text-center hover:shadow-lg transition-all duration-300"
+              >
+                <CardContent className="p-6">
+                  <div
+                    className={`text-3xl font-bold text-${stat.color}-600 dark:text-${stat.color}-400 mb-2`}
+                  >
+                    {stat.value}
+                  </div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                    {stat.label}
+                  </div>
+                  <div
+                    className={`text-xs text-${stat.color}-600 dark:text-${stat.color}-400`}
+                  >
+                    {stat.change}
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Profile Information */}
+          {/*  Information */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  Profile Information
+                  Information
                   {saveStatus === "success" && (
                     <span className="text-sm text-green-600 font-normal">
                       ✅ Saved
@@ -261,7 +280,7 @@ export default function ProfilePage() {
                     <Input
                       id="name"
                       name="name"
-                      value={profileData.name}
+                      value={Data.name}
                       onChange={handleInputChange}
                       disabled={!editMode}
                       className={!editMode ? "bg-gray-50 dark:bg-gray-800" : ""}
@@ -273,7 +292,7 @@ export default function ProfilePage() {
                       id="email"
                       name="email"
                       type="email"
-                      value={profileData.email}
+                      value={Data.email}
                       onChange={handleInputChange}
                       disabled={true}
                       className="bg-gray-50 dark:bg-gray-800"
@@ -286,7 +305,7 @@ export default function ProfilePage() {
                   <Textarea
                     id="bio"
                     name="bio"
-                    value={profileData.bio}
+                    value={Data.bio}
                     onChange={handleInputChange}
                     disabled={!editMode}
                     placeholder="Tell us about yourself..."
@@ -301,7 +320,7 @@ export default function ProfilePage() {
                     <Input
                       id="location"
                       name="location"
-                      value={profileData.location}
+                      value={Data.location}
                       onChange={handleInputChange}
                       disabled={!editMode}
                       placeholder="City, Country"
@@ -313,7 +332,7 @@ export default function ProfilePage() {
                     <Input
                       id="website"
                       name="website"
-                      value={profileData.website}
+                      value={Data.website}
                       onChange={handleInputChange}
                       disabled={!editMode}
                       placeholder="https://yoursite.com"
@@ -328,7 +347,7 @@ export default function ProfilePage() {
                     <Input
                       id="twitter"
                       name="twitter"
-                      value={profileData.twitter}
+                      value={Data.twitter}
                       onChange={handleInputChange}
                       disabled={!editMode}
                       placeholder="@username"
@@ -340,7 +359,7 @@ export default function ProfilePage() {
                     <Input
                       id="telegram"
                       name="telegram"
-                      value={profileData.telegram}
+                      value={Data.telegram}
                       onChange={handleInputChange}
                       disabled={!editMode}
                       placeholder="@username"
@@ -376,7 +395,7 @@ export default function ProfilePage() {
                 <CardTitle>Notification Preferences</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {Object.entries(profileData.notifications).map(
+                {Object.entries(Data.notifications).map(
                   ([key, value]) => (
                     <div
                       key={key}
@@ -387,19 +406,19 @@ export default function ProfilePage() {
                           {key === "email"
                             ? "Email Notifications"
                             : key === "trades"
-                            ? "Trade Alerts"
-                            : key === "security"
-                            ? "Security Alerts"
-                            : "Newsletter"}
+                              ? "Trade Alerts"
+                              : key === "security"
+                                ? "Security Alerts"
+                                : "Newsletter"}
                         </Label>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                           {key === "email"
                             ? "Receive email notifications"
                             : key === "trades"
-                            ? "Get notified about your trades"
-                            : key === "security"
-                            ? "Security-related notifications"
-                            : "Weekly market insights"}
+                              ? "Get notified about your trades"
+                              : key === "security"
+                                ? "Security-related notifications"
+                                : "Weekly market insights"}
                         </p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -463,75 +482,92 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {achievements.map((achievement, index) => (
-                    <div
-                      key={index}
-                      className={`flex items-center p-3 rounded-lg ${
-                        achievement.earned
+                  {loadingStats ? (
+                    // Loading state for achievements
+                    Array.from({ length: 3 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center p-3 rounded-lg bg-gray-50 dark:bg-gray-800 animate-pulse"
+                      >
+                        <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full mr-3"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded mb-1"></div>
+                          <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
+                        </div>
+                      </div>
+                    ))
+                  ) : userAchievements.length > 0 ? (
+                    userAchievements.map((achievement, index) => (
+                      <div
+                        key={index}
+                        className={`flex items-center p-3 rounded-lg ${achievement.earned
                           ? "bg-green-50 dark:bg-green-900/20"
                           : "bg-gray-50 dark:bg-gray-800"
-                      }`}
-                    >
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
-                          achievement.earned
+                          }`}
+                      >
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${achievement.earned
                             ? "bg-green-500"
                             : "bg-gray-300 dark:bg-gray-600"
-                        }`}
-                      >
-                        {achievement.earned ? "🏆" : "🔒"}
-                      </div>
-                      <div className="flex-1">
-                        <h3
-                          className={`font-medium ${
-                            achievement.earned
+                            }`}
+                        >
+                          {achievement.earned ? "🏆" : "🔒"}
+                        </div>
+                        <div className="flex-1">
+                          <h3
+                            className={`font-medium ${achievement.earned
                               ? "text-green-700 dark:text-green-300"
                               : "text-gray-700 dark:text-gray-300"
-                          }`}
-                        >
-                          {achievement.title}
-                        </h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {achievement.description}
-                        </p>
-                        {achievement.earned && achievement.date && (
-                          <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                            Earned on{" "}
-                            {new Date(achievement.date).toLocaleDateString()}
+                              }`}
+                          >
+                            {achievement.title}
+                          </h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {achievement.description}
                           </p>
-                        )}
-                        {!achievement.earned && achievement.progress && (
-                          <div className="mt-2">
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                              <div
-                                className="bg-blue-600 h-2 rounded-full"
-                                style={{
-                                  width: `${Math.min(
-                                    (achievement.progress /
-                                      (achievement.title === "Volume Trader"
-                                        ? 100000
-                                        : achievement.title === "Diversified"
-                                        ? 10
-                                        : 30)) *
-                                      100,
-                                    100
-                                  )}%`,
-                                }}
-                              ></div>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {achievement.progress} /{" "}
-                              {achievement.title === "Volume Trader"
-                                ? "100K"
-                                : achievement.title === "Diversified"
-                                ? "10"
-                                : "30"}
+                          {achievement.earned && achievement.date && (
+                            <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                              Earned on{" "}
+                              {new Date(achievement.date).toLocaleDateString()}
                             </p>
-                          </div>
-                        )}
+                          )}
+                          {!achievement.earned && achievement.progress && (
+                            <div className="mt-2">
+                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full"
+                                  style={{
+                                    width: `${Math.min(
+                                      (achievement.progress /
+                                        (achievement.title === "Volume Trader"
+                                          ? 100000
+                                          : achievement.title === "Diversified"
+                                            ? 10
+                                            : 30)) *
+                                      100,
+                                      100
+                                    )}%`,
+                                  }}
+                                ></div>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {achievement.progress} /{" "}
+                                {achievement.title === "Volume Trader"
+                                  ? "100K"
+                                  : achievement.title === "Diversified"
+                                    ? "10"
+                                    : "30"}
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      <p>No achievements yet. Start trading to earn your first achievement!</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -543,46 +579,61 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-start space-x-3">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs ${
-                          activity.type === "trade"
-                            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30"
-                            : activity.type === "security"
-                            ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30"
-                            : "bg-gray-100 text-gray-600 dark:bg-gray-800"
-                        }`}
-                      >
-                        {activity.type === "trade"
-                          ? "💰"
-                          : activity.type === "security"
-                          ? "🔒"
-                          : "⚙️"}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {activity.description}
-                        </p>
-                        <div className="flex items-center justify-between mt-1">
-                          <p className="text-xs text-gray-500">
-                            {activity.time}
-                          </p>
-                          {activity.profit && (
-                            <span
-                              className={`text-xs font-medium ${
-                                activity.profit.startsWith("+")
-                                  ? "text-green-600"
-                                  : "text-red-600"
-                              }`}
-                            >
-                              {activity.profit}
-                            </span>
-                          )}
+                  {loadingStats ? (
+                    // Loading state for recent activity
+                    Array.from({ length: 4 }).map((_, index) => (
+                      <div key={index} className="flex items-start space-x-3 animate-pulse">
+                        <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+                        <div className="flex-1 min-w-0">
+                          <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded mb-1"></div>
+                          <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-2/3"></div>
                         </div>
                       </div>
+                    ))
+                  ) : recentActivity.length > 0 ? (
+                    recentActivity.map((activity, index) => (
+                      <div key={index} className="flex items-start space-x-3">
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs ${activity.type === "trade"
+                            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30"
+                            : activity.type === "security"
+                              ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30"
+                              : "bg-gray-100 text-gray-600 dark:bg-gray-800"
+                            }`}
+                        >
+                          {activity.type === "trade"
+                            ? "💰"
+                            : activity.type === "security"
+                              ? "🔒"
+                              : "⚙️"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            {activity.description}
+                          </p>
+                          <div className="flex items-center justify-between mt-1">
+                            <p className="text-xs text-gray-500">
+                              {activity.time}
+                            </p>
+                            {activity.profit && (
+                              <span
+                                className={`text-xs font-medium ${activity.profit.startsWith("+")
+                                  ? "text-green-600"
+                                  : "text-red-600"
+                                  }`}
+                              >
+                                {activity.profit}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      <p>No recent activity. Connect a wallet and start trading!</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>

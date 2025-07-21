@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import User from '@/models/User';
 import dbConnect from '@/lib/db/mongodb';
+import { calculateAndUpdateTradingStats } from '@/lib/services/tradingStatsService';
 
 export async function POST(request) {
     try {
@@ -76,6 +77,15 @@ export async function POST(request) {
             process.env.JWT_SECRET,
             { expiresIn: "7d" }
         );
+
+        // Calculate and update trading statistics after successful login
+        try {
+            await calculateAndUpdateTradingStats(user._id);
+            console.log(`[Auth] Trading stats updated for user: ${user.email}`);
+        } catch (error) {
+            console.error(`[Auth] Failed to update trading stats for user ${user.email}:`, error);
+            // Don't fail the login if stats update fails
+        }
 
         // Create response
         const response = NextResponse.json(

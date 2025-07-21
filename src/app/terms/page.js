@@ -73,7 +73,7 @@ Our services are provided "as is" and we reserve the right to modify, suspend, o
 • Not attempt to manipulate markets or engage in wash trading
 • Respect intellectual property rights and not reverse engineer our software
 • Report any security vulnerabilities or suspicious activities
-• Keep your contact information and profile up to date
+• Keep your contact information and  up to date
 
 You are solely responsible for all activities that occur under your account and for maintaining the security of your login credentials.`,
     },
@@ -187,11 +187,10 @@ You agree to waive any right to a jury trial and to resolve disputes on an indiv
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-300 ${
-        isDarkMode
+      className={`min-h-screen transition-colors duration-300 ${isDarkMode
           ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
           : "bg-gradient-to-br from-blue-50 via-white to-indigo-50"
-      }`}
+        }`}
     >
       {/* Header Section */}
       <motion.div
@@ -202,11 +201,10 @@ You agree to waive any right to a jury trial and to resolve disputes on an indiv
       >
         <div className="absolute inset-0 overflow-hidden">
           <div
-            className={`absolute inset-0 ${
-              isDarkMode
+            className={`absolute inset-0 ${isDarkMode
                 ? "bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-gray-900/40"
                 : "bg-gradient-to-br from-blue-100/50 via-purple-100/50 to-indigo-100/50"
-            }`}
+              }`}
           />
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
@@ -215,36 +213,32 @@ You agree to waive any right to a jury trial and to resolve disputes on an indiv
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div variants={fadeInUp} className="flex justify-center mb-8">
             <div
-              className={`p-4 rounded-2xl ${
-                isDarkMode
+              className={`p-4 rounded-2xl ${isDarkMode
                   ? "bg-gray-800/50 border border-gray-700"
                   : "bg-white/80 border border-gray-200 shadow-lg"
-              }`}
+                }`}
             >
               <FileText
-                className={`w-12 h-12 ${
-                  isDarkMode ? "text-blue-400" : "text-blue-600"
-                }`}
+                className={`w-12 h-12 ${isDarkMode ? "text-blue-400" : "text-blue-600"
+                  }`}
               />
             </div>
           </motion.div>
 
           <motion.h1
             variants={fadeInUp}
-            className={`text-5xl lg:text-7xl font-bold mb-6 ${
-              isDarkMode
+            className={`text-5xl lg:text-7xl font-bold mb-6 ${isDarkMode
                 ? "bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent"
                 : "bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent"
-            }`}
+              }`}
           >
             Terms of Service
           </motion.h1>
 
           <motion.p
             variants={fadeInUp}
-            className={`text-xl lg:text-2xl mb-8 max-w-4xl mx-auto leading-relaxed ${
-              isDarkMode ? "text-gray-300" : "text-gray-600"
-            }`}
+            className={`text-xl lg:text-2xl mb-8 max-w-4xl mx-auto leading-relaxed ${isDarkMode ? "text-gray-300" : "text-gray-600"
+              }`}
           >
             Legal terms and conditions governing your use of the AbuBeast
             trading platform. Please read these terms carefully before using our
@@ -253,11 +247,10 @@ You agree to waive any right to a jury trial and to resolve disputes on an indiv
 
           <motion.div
             variants={fadeInUp}
-            className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium ${
-              isDarkMode
+            className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium ${isDarkMode
                 ? "bg-gray-800/50 text-gray-300 border border-gray-700"
                 : "bg-white/80 text-gray-600 border border-gray-200 shadow-sm"
-            }`}
+              }`}
           >
             <Clock className="w-4 h-4" />
             Last updated: December 2024
@@ -277,36 +270,32 @@ You agree to waive any right to a jury trial and to resolve disputes on an indiv
             <motion.div
               key={index}
               variants={cardVariants}
-              className={`p-8 rounded-3xl border transition-all duration-300 hover:shadow-xl ${
-                isDarkMode
+              className={`p-8 rounded-3xl border transition-all duration-300 hover:shadow-xl ${isDarkMode
                   ? "bg-gray-800/50 border-gray-700 hover:bg-gray-800/70"
                   : "bg-white/80 border-gray-200 hover:bg-white shadow-lg"
-              }`}
+                }`}
             >
               <div className="flex items-start gap-6">
                 <div
-                  className={`flex-shrink-0 p-3 rounded-2xl ${
-                    isDarkMode
+                  className={`flex-shrink-0 p-3 rounded-2xl ${isDarkMode
                       ? "bg-blue-900/30 text-blue-400"
                       : "bg-blue-100 text-blue-600"
-                  }`}
+                    }`}
                 >
                   {section.icon}
                 </div>
 
                 <div className="flex-1">
                   <h2
-                    className={`text-2xl font-bold mb-4 ${
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
+                    className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"
+                      }`}
                   >
                     {section.title}
                   </h2>
 
                   <div
-                    className={`text-lg leading-relaxed whitespace-pre-line ${
-                      isDarkMode ? "text-gray-300" : "text-gray-600"
-                    }`}
+                    className={`text-lg leading-relaxed whitespace-pre-line ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                      }`}
                   >
                     {section.content}
                   </div>
@@ -321,24 +310,21 @@ You agree to waive any right to a jury trial and to resolve disputes on an indiv
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className={`mt-16 p-8 rounded-3xl border text-center ${
-            isDarkMode
+          className={`mt-16 p-8 rounded-3xl border text-center ${isDarkMode
               ? "bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-gray-700"
               : "bg-gradient-to-r from-blue-50 to-purple-50 border-gray-200"
-          }`}
+            }`}
         >
           <h3
-            className={`text-2xl font-bold mb-4 ${
-              isDarkMode ? "text-white" : "text-gray-900"
-            }`}
+            className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"
+              }`}
           >
             Questions About These Terms?
           </h3>
 
           <p
-            className={`text-lg mb-6 ${
-              isDarkMode ? "text-gray-300" : "text-gray-600"
-            }`}
+            className={`text-lg mb-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"
+              }`}
           >
             If you have any questions about these Terms of Service, please don't
             hesitate to contact us.
@@ -348,11 +334,10 @@ You agree to waive any right to a jury trial and to resolve disputes on an indiv
             href="/contact"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className={`inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold transition-all duration-300 ${
-              isDarkMode
+            className={`inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold transition-all duration-300 ${isDarkMode
                 ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/25"
                 : "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/25"
-            }`}
+              }`}
           >
             Contact Support
             <Users className="w-5 h-5" />

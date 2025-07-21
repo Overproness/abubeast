@@ -30,6 +30,50 @@ const UserSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // Profile information
+    bio: {
+      type: String,
+      default: "",
+      maxlength: [500, "Bio cannot exceed 500 characters"],
+    },
+    location: {
+      type: String,
+      default: "",
+      maxlength: [100, "Location cannot exceed 100 characters"],
+    },
+    website: {
+      type: String,
+      default: "",
+      maxlength: [200, "Website URL cannot exceed 200 characters"],
+    },
+    twitter: {
+      type: String,
+      default: "",
+      maxlength: [100, "Twitter handle cannot exceed 100 characters"],
+    },
+    telegram: {
+      type: String,
+      default: "",
+      maxlength: [100, "Telegram handle cannot exceed 100 characters"],
+    },
+    notifications: {
+      email: {
+        type: Boolean,
+        default: true,
+      },
+      trades: {
+        type: Boolean,
+        default: true,
+      },
+      security: {
+        type: Boolean,
+        default: true,
+      },
+      newsletter: {
+        type: Boolean,
+        default: false,
+      },
+    },
     // Add wallet information
     wallets: [
       {
@@ -52,6 +96,96 @@ const UserSchema = new mongoose.Schema(
         },
       },
     ],
+    // Profile information
+    bio: {
+      type: String,
+      default: "",
+      maxlength: [500, "Bio cannot exceed 500 characters"],
+    },
+    location: {
+      type: String,
+      default: "",
+      maxlength: [100, "Location cannot exceed 100 characters"],
+    },
+    website: {
+      type: String,
+      default: "",
+      maxlength: [200, "Website URL cannot exceed 200 characters"],
+    },
+    twitter: {
+      type: String,
+      default: "",
+      maxlength: [100, "Twitter handle cannot exceed 100 characters"],
+    },
+    telegram: {
+      type: String,
+      default: "",
+      maxlength: [100, "Telegram handle cannot exceed 100 characters"],
+    },
+    notifications: {
+      email: {
+        type: Boolean,
+        default: true,
+      },
+      trades: {
+        type: Boolean,
+        default: true,
+      },
+      security: {
+        type: Boolean,
+        default: true,
+      },
+      newsletter: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    // Trading statistics
+    tradingStats: {
+      totalTrades: {
+        type: Number,
+        default: 0,
+      },
+      winRate: {
+        type: Number,
+        default: 0,
+      },
+      totalVolume: {
+        type: Number,
+        default: 0,
+      },
+      daysActive: {
+        type: Number,
+        default: 0,
+      },
+      lastUpdated: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+    // Trading statistics
+    tradingStats: {
+      totalTrades: {
+        type: Number,
+        default: 0,
+      },
+      winRate: {
+        type: Number,
+        default: 0,
+      },
+      totalVolume: {
+        type: Number,
+        default: 0,
+      },
+      daysActive: {
+        type: Number,
+        default: 0,
+      },
+      lastUpdated: {
+        type: Date,
+        default: Date.now,
+      },
+    },
     createdAt: {
       type: Date,
       default: Date.now,
