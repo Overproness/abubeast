@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/db/mongodb";
+import tokenApiService from "@/lib/services/tokenApiService";
 import Token from "@/models/Token";
-import axios from "axios";
 import { NextResponse } from "next/server";
 
 // GET handler to retrieve tokens
@@ -37,59 +37,36 @@ export async function GET(request) {
   }
 }
 
-// Fetch token data from Mobula API
+// Fetch token data using unified API service
 async function fetchTokenData(address) {
   try {
-    const apiKey = process.env.MOBULA_API_KEY || "";
+    console.log(`Fetching data for token ${address} using unified API service`);
 
-    console.log(`Fetching data for token ${address}`);
+    const apiResult = await tokenApiService.getTokenData(address);
 
-    const response = await axios({
-      method: "get",
-      url: `https://production-api.mobula.io/api/1/market/data?asset=${address}`,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: apiKey,
-      },
-      timeout: 10000,
-    });
-
-    // Log the structure of the response to help debug
-    if (response.data && response.data.data) {
-      // console.log("🚀 ~ fetchTokenData ~ response.data:", response.data);
-
+    if (apiResult?.data) {
       // Check if price and market cap exist (even if they are 0)
       const hasPrice =
-        response.data.data.price !== undefined &&
-        response.data.data.price !== null;
+        apiResult.data.price !== undefined && apiResult.data.price !== null;
       const hasMarketCap =
-        response.data.data.market_cap !== undefined &&
-        response.data.data.market_cap !== null;
+        apiResult.data.market_cap !== undefined &&
+        apiResult.data.market_cap !== null;
 
       console.log(
-        `Successfully fetched data for ${address}. Has price: ${hasPrice} (${response.data.data.price}), Has market cap: ${hasMarketCap} (${response.data.data.market_cap})`
+        `Successfully fetched data for ${address} from ${apiResult.provider}. Has price: ${hasPrice} (${apiResult.data.price}), Has market cap: ${hasMarketCap} (${apiResult.data.market_cap})`
       );
-    } else {
-      console.log(
-        `Data received for ${address} but missing expected fields:`,
-        JSON.stringify(response.data).substring(0, 200) + "..."
-      );
+
+      return apiResult.data;
     }
 
-    return response.data.data;
+    console.log(
+      `Data received for ${address} but missing expected fields:`,
+      JSON.stringify(apiResult).substring(0, 200) + "..."
+    );
+
+    return null;
   } catch (error) {
-    if (error.response) {
-      console.error(
-        `Failed to fetch data for ${address}: ${error.response.status}`
-      );
-      if (error.response.data) {
-        console.error(`Error details for ${address}:`, error.response.data);
-      }
-    } else if (error.request) {
-      console.error(`No response received for ${address}:`, error.request);
-    } else {
-      console.error(`Error fetching data for ${address}:`, error.message);
-    }
+    console.error(`Error fetching data for ${address}:`, error.message);
     return null;
   }
 }

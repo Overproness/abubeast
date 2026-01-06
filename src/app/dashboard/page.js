@@ -1,5 +1,6 @@
 "use client";
 
+import AutomatedTradingWidget from "@/components/AutomatedTradingWidget";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import MarketOverview from "@/components/dashboard/MarketOverview";
 import PortfolioOverview from "@/components/dashboard/PortfolioOverview";
@@ -355,6 +356,11 @@ export default function Dashboard() {
           {walletInfo && walletInfo.address && (
             <WalletStatus walletInfo={walletInfo} />
           )}
+
+          {/* Automated Trading Widget */}
+          <motion.div variants={fadeInUp}>
+            <AutomatedTradingWidget />
+          </motion.div>
 
           {/* Market Overview */}
           <MarketOverview marketData={marketOverview} />

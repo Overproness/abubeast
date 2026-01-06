@@ -1,5 +1,5 @@
+import tokenApiService from "@/lib/services/tokenApiService";
 import { NextResponse } from "next/server";
-import axios from "axios";
 
 export async function GET(request, { params }) {
   try {
@@ -18,46 +18,26 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Get API key from environment variable
-    const apiKey = process.env.MOBULA_API_KEY;
-
-    if (!apiKey) {
-      console.error("MOBULA_API_KEY not found in environment variables");
-      return NextResponse.json(
-        { error: "API key configuration error" },
-        { status: 500 }
-      );
-    }
-
-    // Calculate the blockchain parameter (default to Ethereum)
-    // This should be extracted from token data if available
-    const blockchain = "ethereum";
-
+    // Use unified API service to get holders data
     try {
-      // Make request to Mobula API for token holders using axios
-      const response = await axios({
-        method: "get",
-        url: `https://production-api.mobula.io/api/1/market/token/holders?asset=${address}&blockchain=${blockchain}&limit=${limit}&offset=${offset}`,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: apiKey,
-        },
-        timeout: 10000,
-      });
+      const result = await tokenApiService.getTokenHolders(
+        address,
+        limit,
+        offset
+      );
 
       return NextResponse.json({
         success: true,
-        holders: response.data.data || [],
-        total_count: response.data.total_count || 0,
+        holders: result.holders,
+        total_count: result.total_count,
+        provider: result.provider,
       });
     } catch (apiError) {
       console.error("Error fetching holders data:", apiError.message);
       return NextResponse.json(
         {
           error: "Failed to fetch holders data",
-          details: apiError.response
-            ? apiError.response.data
-            : apiError.message,
+          details: apiError.message,
         },
         { status: 500 }
       );

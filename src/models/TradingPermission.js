@@ -18,9 +18,15 @@ const tradingPermissionSchema = new mongoose.Schema({
     required: true,
     enum: ["ethereum", "solana", "evm"],
   },
+  // Session key reference (if using session key for trading)
+  sessionKeyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "SessionKey",
+    index: true,
+  },
+  // Traditional signature-based permission (for backward compatibility)
   signature: {
     type: String,
-    required: true,
   },
   message: {
     type: String,

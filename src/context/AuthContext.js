@@ -1,5 +1,14 @@
 "use client";
 
+import { ethers } from "ethers";
+import { useRouter } from "next/navigation";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import {
   connectBitgetWallet,
   connectCoinbaseWallet,
@@ -11,15 +20,6 @@ import {
   connectWalletConnect,
   disconnectWallet,
 } from "../lib/wallet/walletUtils";
-import { ethers } from "ethers";
-import { useRouter } from "next/navigation";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
 
 // Check ethers version
 const ethersVersion = parseInt(ethers.version.split(".")[0]);
@@ -34,18 +34,18 @@ const AuthContext = createContext({
   user: null,
   loading: true,
   authChecked: false,
-  login: async () => { },
-  logout: async () => { },
-  signup: async () => { },
-  checkAuth: async () => { },
-  verifyOTP: async () => { },
+  login: async () => {},
+  logout: async () => {},
+  signup: async () => {},
+  checkAuth: async () => {},
+  verifyOTP: async () => {},
   isAuthenticated: false,
-  connectWallet: async () => { },
-  disconnectWallet: async () => { },
+  connectWallet: async () => {},
+  disconnectWallet: async () => {},
   walletInfo: null,
   tradingPermissions: [],
-  fetchTradingPermissions: async () => { },
-  revokeTradingPermission: async () => { },
+  fetchTradingPermissions: async () => {},
+  revokeTradingPermission: async () => {},
 });
 
 // Auth provider component
@@ -691,6 +691,71 @@ export function AuthProvider({ children }) {
     tradingPermissions,
     fetchTradingPermissions,
     revokeTradingPermission,
+    // Session key methods (to be implemented)
+    sessionKeys: {
+      generate: async (walletAddress, config) => {
+        try {
+          const response = await fetch("/api/session-keys/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ walletAddress, ...config }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error);
+          return { success: true, data };
+        } catch (error) {
+          console.error("[Auth] Session key generation error:", error);
+          return { success: false, error: error.message };
+        }
+      },
+      authorize: async (authData) => {
+        try {
+          const response = await fetch("/api/session-keys/authorize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(authData),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error);
+          return { success: true, data };
+        } catch (error) {
+          console.error("[Auth] Session key authorization error:", error);
+          return { success: false, error: error.message };
+        }
+      },
+      list: async (walletAddress = null) => {
+        try {
+          const params = walletAddress ? `?walletAddress=${walletAddress}` : "";
+          const response = await fetch(`/api/session-keys/list${params}`, {
+            credentials: "include",
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error);
+          return { success: true, data: data.sessionKeys };
+        } catch (error) {
+          console.error("[Auth] Session keys list error:", error);
+          return { success: false, error: error.message };
+        }
+      },
+      revoke: async (sessionKeyId) => {
+        try {
+          const response = await fetch("/api/session-keys/revoke", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ sessionKeyId }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error);
+          return { success: true, data };
+        } catch (error) {
+          console.error("[Auth] Session key revoke error:", error);
+          return { success: false, error: error.message };
+        }
+      },
+    },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

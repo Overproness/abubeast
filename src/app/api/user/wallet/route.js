@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    const { walletAddress } = await request.json();
+    const { walletAddress, walletType } = await request.json();
 
     // Check for authentication
     const token = request.cookies.get("token")?.value;
@@ -21,21 +21,33 @@ export async function POST(request) {
     // Connect to the database
     await dbConnect();
 
-    // Update the user with the wallet address
-    const updatedUser = await User.findByIdAndUpdate(
-      tokenData.userId,
-      { $addToSet: { walletAddresses: walletAddress } },
-      { new: true }
+    // Find the user
+    const user = await User.findById(tokenData.userId);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Check if wallet already exists
+    const walletExists = user.wallets?.some(
+      (w) => w.address.toLowerCase() === walletAddress.toLowerCase()
     );
 
-    if (!updatedUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!walletExists) {
+      // Add new wallet
+      user.wallets = user.wallets || [];
+      user.wallets.push({
+        type: walletType || "phantom",
+        address: walletAddress,
+        addedAt: new Date(),
+        updatedAt: new Date(),
+      });
+      await user.save();
     }
 
     return NextResponse.json({
       success: true,
       message: "Wallet address added successfully",
-      walletAddresses: updatedUser.walletAddresses,
+      wallets: user.wallets,
     });
   } catch (error) {
     console.error("Error in wallet route:", error);

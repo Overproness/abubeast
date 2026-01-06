@@ -26,14 +26,14 @@ export async function POST(request) {
     }
 
     const tokenData = await verifyToken(token); // Added await
-    if (!tokenData || !tokenData.id) {
+    if (!tokenData || !tokenData.userId) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
     await dbConnect();
 
     // Find user
-    const user = await User.findById(tokenData.id); // Changed from userId to id
+    const user = await User.findById(tokenData.userId);
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -97,7 +97,7 @@ export async function GET(request) {
     }
 
     const tokenData = await verifyToken(token); // Added await
-    if (!tokenData || !tokenData.id) {
+    if (!tokenData || !tokenData.userId) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
@@ -105,7 +105,7 @@ export async function GET(request) {
 
     // Get all trading permissions for this user
     const permissions = await TradingPermission.find({
-      userId: tokenData.id, // Changed from userId to id
+      userId: tokenData.userId,
     }).lean();
 
     return NextResponse.json({
@@ -139,7 +139,7 @@ export async function DELETE(request) {
     }
 
     const tokenData = await verifyToken(token); // Added await
-    if (!tokenData || !tokenData.id) {
+    if (!tokenData || !tokenData.userId) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
@@ -147,7 +147,7 @@ export async function DELETE(request) {
 
     // Delete the permission
     await TradingPermission.deleteOne({
-      userId: tokenData.id, // Changed from userId to id
+      userId: tokenData.userId,
       walletAddress: walletAddress.toLowerCase(),
     });
 

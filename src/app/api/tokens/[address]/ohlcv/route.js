@@ -1,5 +1,5 @@
+import tokenApiService from "@/lib/services/tokenApiService";
 import { NextResponse } from "next/server";
-import axios from "axios";
 
 export async function GET(request, { params }) {
   try {
@@ -38,60 +38,22 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Get API key from environment variable
-    const apiKey = process.env.MOBULA_API_KEY;
-
-    if (!apiKey) {
-      console.error("MOBULA_API_KEY not found in environment variables");
-      return NextResponse.json(
-        { error: "API key configuration error" },
-        { status: 500 }
-      );
-    }
-
-    // Use axios instead of fetch
+    // Use unified API service to get OHLCV data
     try {
-      const response = await axios({
-        method: "get",
-        url: `https://production-api.mobula.io/api/1/market/candles?asset=${address}&period=${period}`,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: apiKey,
-        },
-        timeout: 10000,
+      const result = await tokenApiService.getOHLCVData(address, period);
+
+      return NextResponse.json({
+        success: true,
+        ohlcv: result.ohlcv,
+        provider: result.provider,
       });
-
-      // Format OHLCV data for the chart
-      if (response.data.data && Array.isArray(response.data.data)) {
-        const ohlcv = response.data.data.map((candle) => ({
-          time: candle.timestamp / 1000, // Convert to seconds for lightweight-charts
-          open: candle.open,
-          high: candle.high,
-          low: candle.low,
-          close: candle.close,
-          volume: candle.volume,
-        }));
-
-        return NextResponse.json({
-          success: true,
-          ohlcv,
-        });
-      } else {
-        return NextResponse.json(
-          { error: "Invalid data format from API" },
-          { status: 500 }
-        );
-      }
     } catch (apiError) {
       console.error("Error fetching OHLCV data:", apiError.message);
 
-      // Return a more descriptive error for debugging
       return NextResponse.json(
         {
           error: "Failed to fetch OHLCV data",
-          details: apiError.response
-            ? apiError.response.data
-            : apiError.message,
+          details: apiError.message,
         },
         { status: 500 }
       );

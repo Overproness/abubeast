@@ -1,86 +1,103 @@
 import dbConnect from "@/lib/db/mongodb";
+import tokenApiService from "@/lib/services/tokenApiService";
+import goPlusSecurityService from "@/lib/services/goPlusSecurityService";
 import Token from "@/models/Token";
-import axios from "axios";
 import { NextResponse } from "next/server";
 
-// Fetch token data from Mobula API
+// Fetch token data and security analysis using unified services
 async function fetchTokenData(address) {
   try {
-    const apiKey = process.env.MOBULA_API_KEY || "";
+    console.log(
+      `[Enrichment] Fetching data for token ${address} using unified API service`
+    );
 
-    console.log(`[Enrichment] Fetching data for token ${address}`);
+    const apiResult = await tokenApiService.getTokenData(address);
 
-    const response = await axios({
-      method: "get",
-      url: `https://production-api.mobula.io/api/1/market/data?asset=${address}`,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: apiKey,
-      },
-      timeout: 10000,
-    });
-
-    // Log the structure of the response to help debug
-    if (response.data && response.data.data) {
+    if (apiResult?.data) {
       console.log(
-        `[Enrichment] Successfully fetched data for ${address}. Has price: ${!!response
-          .data.data.price}, Has market cap: ${!!response.data.data.market_cap}`
+        `[Enrichment] Successfully fetched data for ${address} from ${
+          apiResult.provider
+        }. Has price: ${!!apiResult.data.price}, Has market cap: ${!!apiResult
+          .data.market_cap}`
       );
+      return apiResult.data;
     } else {
       console.log(
         `[Enrichment] Data received for ${address} but missing expected fields:`,
-        JSON.stringify(response.data).substring(0, 200) + "..."
+        JSON.stringify(apiResult).substring(0, 200) + "..."
       );
+      return null;
     }
-
-    return response.data.data;
   } catch (error) {
-    if (error.response) {
-      console.error(
-        `Failed to fetch data for ${address}: ${error.response.status}`
-      );
-      if (error.response.data) {
-        console.error(`Error details:`, error.response.data);
-      }
-    } else if (error.request) {
-      console.error(`No response received for ${address}`);
-    } else {
-      console.error(`Error fetching data for ${address}:`, error.message);
-    }
+    console.error(
+      `[Enrichment] Error fetching data for ${address}:`,
+      error.message
+    );
     return null;
   }
 }
 
-// Fetch multiple tokens data from Mobula API
+// Fetch security analysis for a token
+async function fetchTokenSecurity(address) {
+  try {
+    console.log(`[Enrichment] Fetching security analysis for token ${address}`);
+    
+    const securityAnalysis = await goPlusSecurityService.analyzeTokenSecurity(address);
+    
+    if (securityAnalysis) {
+      console.log(
+        `[Enrichment] Security analysis complete for ${address}: Risk Level = ${securityAnalysis.overall_risk_level}, Tradeable = ${securityAnalysis.is_tradeable}`
+      );
+      return securityAnalysis;
+    } else {
+      console.log(`[Enrichment] No security data available for ${address}`);
+      return null;
+    }
+  } catch (error) {
+    console.error(
+      `[Enrichment] Error fetching security analysis for ${address}:`,
+      error.message
+    );
+    return null;
+  }
+}
+
+// Fetch multiple tokens data with security analysis
 async function fetchMultiTokenData(addresses) {
   if (addresses.length === 0) return {};
 
   try {
-    const apiKey = process.env.MOBULA_API_KEY || "";
-    const assetsParam = addresses.join(",");
+    console.log(
+      `[Enrichment] Fetching batch data for ${addresses.length} tokens using unified API service`
+    );
 
-    const response = await axios({
-      method: "get",
-      url: `https://production-api.mobula.io/api/1/market/multi-data?assets=${assetsParam}`,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: apiKey,
-      },
-      timeout: 15000, // Longer timeout for batch requests
-    });
+    const results = {};
 
-    return response.data.data || {};
-  } catch (error) {
-    if (error.response) {
-      console.warn(`Failed to fetch batch data: ${error.response.status}`);
-      if (error.response.data) {
-        console.warn(`Error details:`, error.response.data);
+    for (const address of addresses) {
+      try {
+        // Fetch market data
+        const marketData = await fetchTokenData(address);
+        
+        // Fetch security analysis
+        const securityData = await fetchTokenSecurity(address);
+        
+        if (marketData || securityData) {
+          results[address] = {
+            marketData,
+            securityData
+          };
+        }
+      } catch (error) {
+        console.warn(
+          `[Enrichment] Failed to fetch data for ${address}:`,
+          error.message
+        );
       }
-    } else if (error.request) {
-      console.warn(`No response received for batch request`);
-    } else {
-      console.error("Error fetching batch data:", error.message);
     }
+
+    return results;
+  } catch (error) {
+    console.warn(`[Enrichment] Failed to fetch batch data:`, error.message);
     return {};
   }
 }
@@ -115,30 +132,57 @@ export async function POST() {
     for (const token of unprocessedTokens) {
       // Process token if we got data for it
       if (tokenDataMap[token.mint_address]) {
-        // Check if we have the essential price data
-        const tokenData = tokenDataMap[token.mint_address];
-        if (!tokenData.price) {
+        const { marketData: tokenData, securityData } = tokenDataMap[token.mint_address];
+        
+        // Prepare update object
+        const updateData = {
+          processed: true,
+          last_updated: new Date().toISOString(),
+        };
+        
+        // Add market data if available
+        if (tokenData) {
+          updateData.marketData = tokenData;
+          
+          // Check if we have the essential price data
+          if (!tokenData.price) {
+            console.log(
+              `[Enrichment] Warning: Token ${token.mint_address} is missing price data`
+            );
+          }
+          if (!tokenData.market_cap) {
+            console.log(
+              `[Enrichment] Warning: Token ${token.mint_address} is missing market cap data`
+            );
+          }
+        }
+        
+        // Add security data if available
+        if (securityData) {
+          updateData.securityData = securityData;
           console.log(
-            `[Enrichment] Warning: Token ${token.mint_address} is missing price data`
+            `[Enrichment] Security data added for ${token.mint_address}: Risk=${securityData.overall_risk_level}, Red Flags=${securityData.red_flags?.length || 0}`
           );
         }
-        if (!tokenData.market_cap) {
-          console.log(
-            `[Enrichment] Warning: Token ${token.mint_address} is missing market cap data`
-          );
+        
+        // Set processing notes
+        const hasPrice = tokenData?.price;
+        const hasMarketCap = tokenData?.market_cap;
+        const hasSecurity = !!securityData;
+        
+        if (hasPrice && hasMarketCap && hasSecurity) {
+          updateData.processingNotes = "Fully processed with security analysis";
+        } else if (hasPrice && hasMarketCap) {
+          updateData.processingNotes = "Market data processed, security analysis pending";
+        } else if (hasSecurity) {
+          updateData.processingNotes = "Security analysis completed, market data partial/missing";
+        } else {
+          updateData.processingNotes = `Partially processed: Has price=${!!hasPrice}, Has marketCap=${!!hasMarketCap}, Has security=${hasSecurity}`;
         }
 
         await Token.findOneAndUpdate(
           { mint_address: token.mint_address },
-          {
-            marketData: tokenData,
-            processed: true,
-            last_updated: new Date().toISOString(),
-            processingNotes:
-              tokenData.price && tokenData.market_cap
-                ? "Fully processed"
-                : `Partially processed: Has price=${!!tokenData.price}, Has marketCap=${!!tokenData.market_cap}`,
-          }
+          updateData
         );
         processedCount++;
       }
@@ -155,32 +199,60 @@ export async function POST() {
       );
 
       for (const token of stillUnprocessedTokens) {
-        // Try to fetch individually
+        // Try to fetch market data and security analysis individually
         const tokenData = await fetchTokenData(token.mint_address);
-        if (tokenData) {
-          // Check if we have the essential price data
-          if (!tokenData.price) {
+        const securityData = await fetchTokenSecurity(token.mint_address);
+        
+        if (tokenData || securityData) {
+          // Prepare update object
+          const updateData = {
+            processed: true,
+            last_updated: new Date().toISOString(),
+          };
+          
+          // Add market data if available
+          if (tokenData) {
+            updateData.marketData = tokenData;
+            
+            // Check if we have the essential price data
+            if (!tokenData.price) {
+              console.log(
+                `[Enrichment] Warning: Token ${token.mint_address} is missing price data`
+              );
+            }
+            if (!tokenData.market_cap) {
+              console.log(
+                `[Enrichment] Warning: Token ${token.mint_address} is missing market cap data`
+              );
+            }
+          }
+          
+          // Add security data if available
+          if (securityData) {
+            updateData.securityData = securityData;
             console.log(
-              `[Enrichment] Warning: Token ${token.mint_address} is missing price data`
+              `[Enrichment] Security data added for ${token.mint_address}: Risk=${securityData.overall_risk_level}`
             );
           }
-          if (!tokenData.market_cap) {
-            console.log(
-              `[Enrichment] Warning: Token ${token.mint_address} is missing market cap data`
-            );
+          
+          // Set processing notes
+          const hasPrice = tokenData?.price;
+          const hasMarketCap = tokenData?.market_cap;
+          const hasSecurity = !!securityData;
+          
+          if (hasPrice && hasMarketCap && hasSecurity) {
+            updateData.processingNotes = "Fully processed with security analysis";
+          } else if (hasPrice && hasMarketCap) {
+            updateData.processingNotes = "Market data processed, security analysis failed";
+          } else if (hasSecurity) {
+            updateData.processingNotes = "Security analysis completed, market data missing";
+          } else {
+            updateData.processingNotes = `Partially processed: Has price=${!!hasPrice}, Has marketCap=${!!hasMarketCap}, Has security=${hasSecurity}`;
           }
 
           await Token.findOneAndUpdate(
             { mint_address: token.mint_address },
-            {
-              marketData: tokenData,
-              processed: true,
-              last_updated: new Date().toISOString(),
-              processingNotes:
-                tokenData.price && tokenData.market_cap
-                  ? "Fully processed"
-                  : `Partially processed: Has price=${!!tokenData.price}, Has marketCap=${!!tokenData.market_cap}`,
-            }
+            updateData
           );
           processedCount++;
         } else {
@@ -191,7 +263,7 @@ export async function POST() {
               processed: true,
               last_updated: new Date().toISOString(),
               processingNotes:
-                "Marked as processed but no data was retrieved from API",
+                "Marked as processed but no data was retrieved from APIs",
             }
           );
           console.log(
@@ -249,6 +321,18 @@ export async function GET(request) {
       (t) => t.processed && (!t.marketData || !t.marketData.market_cap)
     ).length;
 
+    const missingSecurityCount = tokens.filter(
+      (t) => t.processed && (!t.securityData || !t.securityData.has_security_data)
+    ).length;
+
+    const highRiskTokens = tokens.filter(
+      (t) => t.securityData && t.securityData.overall_risk_level === 'high'
+    ).length;
+
+    const untradeableTokens = tokens.filter(
+      (t) => t.securityData && t.securityData.is_tradeable === false
+    ).length;
+
     return NextResponse.json({
       success: true,
       tokens,
@@ -258,6 +342,10 @@ export async function GET(request) {
         unprocessed: tokens.filter((t) => !t.processed).length,
         missingPrice: missingPriceCount,
         missingMarketCap: missingMarketCapCount,
+        missingSecurity: missingSecurityCount,
+        highRiskTokens,
+        untradeableTokens,
+        securityCoverage: `${((tokens.length - missingSecurityCount) / Math.max(tokens.length, 1) * 100).toFixed(1)}%`
       },
     });
   } catch (error) {

@@ -1,0 +1,36 @@
+{
+  "name": "swappers2-js",
+  "version": "0.1.0",
+  "description": "JavaScript port of Solana trading bot",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "worker": "node src/worker.js",
+    "login": "node src/login.js",
+    "test": "node src/test.js",
+    "test:operations": "node src/bin/test_operations.js",
+    "example:solana": "node src/bin/solana_example.js",
+    "ankr": "node src/bin/run_ankr.js"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.95.0",
+    "@solana/spl-token": "^0.4.0",
+    "axios": "^1.7.0",
+    "dotenv": "^16.4.0",
+    "ini": "^5.0.0",
+    "csv-parser": "^3.0.0",
+    "csv-writer": "^1.6.0",
+    "chalk": "^5.3.0",
+    "bs58": "^6.0.0",
+    "buffer": "^6.0.3",
+    "ethers": "^6.13.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

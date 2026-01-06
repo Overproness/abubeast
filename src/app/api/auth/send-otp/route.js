@@ -3,6 +3,9 @@ import User from "@/models/User";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
+// Specify Node.js runtime
+export const runtime = "nodejs";
+
 // Generate 6-digit OTP
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();

@@ -1,5 +1,5 @@
+import tokenApiService from "@/lib/services/tokenApiService";
 import { NextResponse } from "next/server";
-import axios from "axios";
 
 export async function GET(request, { params }) {
   try {
@@ -13,59 +13,21 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Get API key from environment variable
-    const apiKey = process.env.MOBULA_API_KEY;
-
-    if (!apiKey) {
-      console.error("MOBULA_API_KEY not found in environment variables");
-      return NextResponse.json(
-        { error: "API key configuration error" },
-        { status: 500 }
-      );
-    }
-
+    // Use unified API service to get transactions data
     try {
-      // Make request to Mobula API for recent transactions
-      const response = await axios({
-        method: "get",
-        url: `https://production-api.mobula.io/api/1/market/trades?asset=${address}&limit=50`,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: apiKey,
-        },
-        timeout: 10000,
+      const result = await tokenApiService.getTokenTransactions(address, 50);
+
+      return NextResponse.json({
+        success: true,
+        transactions: result.transactions,
+        provider: result.provider,
       });
-
-      // Format transactions data
-      if (response.data.data && Array.isArray(response.data.data)) {
-        const transactions = response.data.data.map((tx) => ({
-          hash: tx.hash,
-          timestamp: tx.date,
-          type: tx.type, // "buy" or "sell"
-          amount: tx.token_amount,
-          amountUsd: tx.token_amount_usd,
-          price: tx.token_price,
-          sender: tx.sender,
-        }));
-
-        return NextResponse.json({
-          success: true,
-          transactions,
-        });
-      } else {
-        return NextResponse.json(
-          { error: "Invalid data format from API" },
-          { status: 500 }
-        );
-      }
     } catch (apiError) {
       console.error("Error fetching transactions data:", apiError.message);
       return NextResponse.json(
         {
           error: "Failed to fetch transactions data",
-          details: apiError.response
-            ? apiError.response.data
-            : apiError.message,
+          details: apiError.message,
         },
         { status: 500 }
       );

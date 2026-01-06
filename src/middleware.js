@@ -1,10 +1,25 @@
 import { NextResponse } from "next/server";
 import { verifyToken } from "./lib/auth/jwt";
+import { initializeApp } from "./lib/startup";
+
+// Track if services have been initialized
+let servicesInitialized = false;
 
 // Define protected routes that require authentication
 const protectedRoutes = ["/dashboard", "/trading", "/swap"];
 
 export async function middleware(request) {
+  // Initialize services on first request
+  if (!servicesInitialized) {
+    try {
+      await initializeApp();
+      servicesInitialized = true;
+    } catch (error) {
+      console.error("[Middleware] Failed to initialize services:", error);
+      // Continue anyway - services can be restarted later
+    }
+  }
+
   // Get the path of the request
   const path = request.nextUrl.pathname;
 

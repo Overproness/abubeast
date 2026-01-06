@@ -60,6 +60,7 @@ export default function Navbar() {
     { href: "/features", label: "Features" },
     { href: "/pricing", label: "Pricing" },
     { href: "/dashboard", label: "Dashboard", requiresAuth: true },
+    { href: "/trading/automated", label: "Auto Trading", requiresAuth: true },
     { href: "/blog", label: "Blog" },
     { href: "/contact", label: "Contact" },
   ];
@@ -87,6 +88,27 @@ export default function Navbar() {
         </svg>
       ),
       description: "View your wallet portfolio and performance",
+    },
+    {
+      name: "Automated Trading",
+      href: "/trading/automated",
+      icon: (
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 10V3L4 14h7v7l9-11h-7z"
+          />
+        </svg>
+      ),
+      description: "Authorize bot to trade 24/7",
+      highlight: true,
     },
   ];
 

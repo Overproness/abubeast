@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/db/mongodb";
+import tokenApiService from "@/lib/services/tokenApiService";
 import Token from "@/models/Token";
-import axios from "axios";
 import { NextResponse } from "next/server";
 
 export async function GET(request, { params }) {
@@ -48,28 +48,23 @@ export async function GET(request, { params }) {
     // If the token needs a refresh, attempt to fetch the latest data
     if (needsRefresh) {
       try {
-        const apiKey = process.env.MOBULA_API_KEY || "";
+        console.log(
+          `Token ${address} is marked as processed but missing price or market cap data. Will attempt refresh using unified API service.`
+        );
 
-        const response = await axios({
-          method: "get",
-          url: `https://production-api.mobula.io/api/1/market/data?asset=${address}`,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: apiKey,
-          },
-          timeout: 10000,
-        });
+        const apiResult = await tokenApiService.getTokenData(address);
 
-        if (response.data && response.data.data) {
+        if (apiResult?.data) {
           // Update the token with the latest data
           await Token.findOneAndUpdate(
             { mint_address: address },
             {
-              marketData: response.data.data,
+              marketData: apiResult.data,
               last_updated: new Date().toISOString(),
-              processingNotes: `Refreshed during token page view because data was missing. Has price=${!!response
-                .data.data.price}, Has marketCap=${!!response.data.data
-                .market_cap}`,
+              processingNotes: `Refreshed during token page view using ${
+                apiResult.provider
+              } API. Has price=${!!apiResult.data
+                .price}, Has marketCap=${!!apiResult.data.market_cap}`,
             }
           );
 
@@ -82,13 +77,14 @@ export async function GET(request, { params }) {
               success: true,
               token: updatedToken,
               refreshed: true,
+              provider: apiResult.provider,
             });
           }
         }
       } catch (refreshError) {
         console.error(
           `Error refreshing token data for ${address}:`,
-          refreshError
+          refreshError.message
         );
         // Continue with the original token data even if refresh failed
       }
