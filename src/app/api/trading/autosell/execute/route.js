@@ -1,20 +1,26 @@
+export const runtime = "nodejs";
+
 /**
  * Manual Auto-Sell Execution API Route
  * POST /api/trading/autosell/execute - Manually trigger auto-sell for a token using session key
  */
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { verifyToken } from "@/lib/auth/auth";
 import { SessionBasedAutoSell } from "@/lib/trading/sessionBasedAutoSell";
 import { getValidSessionKey } from "@/lib/trading/sessionKeyTrading";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    // Verify user authentication
+    const token = request.cookies.get("token")?.value;
+    if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const tokenData = await verifyToken(token);
+    if (!tokenData || !tokenData.id) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -35,7 +41,7 @@ export async function POST(request) {
     }
 
     // Get user's valid session key
-    const sessionKey = await getValidSessionKey(session.user.id, walletAddress);
+    const sessionKey = await getValidSessionKey(tokenData.id, walletAddress);
 
     if (!sessionKey) {
       return NextResponse.json(
@@ -61,7 +67,7 @@ export async function POST(request) {
     // Execute auto-sell
     const autoSell = new SessionBasedAutoSell();
     const result = await autoSell.sellTokenForUser({
-      userId: session.user.id,
+      userId: tokenData.id,
       walletAddress,
       tokenMint,
       triggerType: triggerType || "manual",

@@ -1,27 +1,33 @@
+export const runtime = "nodejs";
+
 /**
  * Token Discovery Configuration API Route
  * GET/PUT /api/trading/discovery/config - Configure token discovery and monitoring
  */
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { verifyToken } from "@/lib/auth/auth";
 import { getTradingServices } from "@/initTradingBot";
 import dbConnect from "@/lib/db/mongodb";
 import TradingSettings from "@/models/TradingSettings";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    // Verify user authentication
+    const token = request.cookies.get("token")?.value;
+    if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const tokenData = await verifyToken(token);
+    if (!tokenData || !tokenData.id) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
     await dbConnect();
 
     // Get user's trading settings
-    const settings = await TradingSettings.findOne({ userId: session.user.id });
+    const settings = await TradingSettings.findOne({ userId: tokenData.id });
 
     if (!settings) {
       return NextResponse.json({
@@ -58,21 +64,26 @@ export async function GET(request) {
 
 export async function PUT(request) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    // Verify user authentication
+    const token = request.cookies.get("token")?.value;
+    if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const tokenData = await verifyToken(token);
+    if (!tokenData || !tokenData.id) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
     const body = await request.json();
     await dbConnect();
 
     // Get or create user's trading settings
-    let settings = await TradingSettings.findOne({ userId: session.user.id });
+    let settings = await TradingSettings.findOne({ userId: tokenData.id });
 
     if (!settings) {
       settings = new TradingSettings({
-        userId: session.user.id,
+        userId: tokenData.id,
       });
     }
 

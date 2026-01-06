@@ -104,6 +104,10 @@ export class SolanaTrader {
     } catch (error) {
       console.error(`Error getting token decimals: ${error.message}`);
       throw error;
+    }
+  }
+
+  async sellToken(
     keypair,
     tokenMint,
     outputMint,
@@ -180,11 +184,7 @@ export class SolanaTrader {
     }
 
     // Sign transaction with user's session key
-    transaction.sign([sionedTransaction(recompiledMessage);
-    }
-
-    // Sign transaction
-    transaction.sign([this.keypair]);
+    transaction.sign([keypair]);
 
     // Send transaction
     console.log("\n📤 Sending transaction...");
@@ -196,7 +196,8 @@ export class SolanaTrader {
     return signature;
   }
 
-  askeypair,
+  async buyToken(
+    keypair,
     inputMint,
     tokenMint,
     amountSol,
@@ -260,8 +261,7 @@ export class SolanaTrader {
     }
 
     // Sign with user's session key
-    transaction.sign([
-    transaction.sign([this.keypair]);
+    transaction.sign([keypair]);
 
     const signature = await this.sendTransaction(transaction, useJito);
     console.log(`✅ Buy transaction sent: ${signature}`);

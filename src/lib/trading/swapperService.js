@@ -110,9 +110,7 @@ export class SwapperService {
         outputMint,
         amount,
       };
-    }✅ Multi-account swap complete: ${successful}/${results.length} successful`);
-
-    return results;
+    }
   }
 
   /**
@@ -173,4 +171,6 @@ export class SwapperService {
       SOL_MINT,
       amount,
       slippageBps
-    )
+    );
+  }
+}

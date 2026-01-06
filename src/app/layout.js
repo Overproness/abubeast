@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 import { Poppins, Roboto_Mono } from "next/font/google";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import ServiceInitializer from "../components/ServiceInitializer";
 import ThemeScript from "../components/ThemeScript";
 import ThemeStatus from "../components/ThemeStatus";
 import TradingErrorBoundary from "../components/TradingErrorBoundary";
@@ -39,6 +40,7 @@ export default function RootLayout({ children }) {
           <ThemeScript />
           <TradingErrorBoundary>
             <AuthProvider>
+              <ServiceInitializer />
               <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
                 <Navbar />
                 <main className="flex-grow pt-20">{children}</main>

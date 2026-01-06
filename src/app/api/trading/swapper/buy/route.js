@@ -1,12 +1,13 @@
+export const runtime = "nodejs";
+
 /**
  * Swapper Manual Trade API Route
  * POST /api/trading/swapper/buy - Manual buy using session key (swapper logic)
  * POST /api/trading/swapper/sell - Manual sell using session key (swapper logic)
  */
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { verifyToken } from "@/lib/auth/auth";
 import { SessionBasedSwapper } from "@/lib/trading/sessionBasedSwapper";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 /**
@@ -14,14 +15,19 @@ import { NextResponse } from "next/server";
  */
 export async function POST(request) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    // Verify user authentication
+    const token = request.cookies.get("token")?.value;
+    if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const tokenData = await verifyToken(token);
+    if (!tokenData || !tokenData.id) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+
     const body = await request.json();
-    const { tokenMint, amountInSol, slippage, walletAddress, tokenData } = body;
+    const { tokenMint, amountInSol, slippage, walletAddress, tokenData: tokenInfo } = body;
 
     // Validate required fields
     if (!tokenMint || !amountInSol || !walletAddress) {
@@ -37,12 +43,12 @@ export async function POST(request) {
     // Use SessionBasedSwapper for buy
     const swapper = new SessionBasedSwapper();
     const result = await swapper.buyTokenForUser({
-      userId: session.user.id,
+      userId: tokenData.id,
       walletAddress,
       tokenMint,
       amountInSol: parseFloat(amountInSol),
       slippage: slippage || 5,
-      tokenData: tokenData || {},
+      tokenData: tokenInfo || {},
     });
 
     if (result.success) {

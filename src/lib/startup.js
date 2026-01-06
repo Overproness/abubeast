@@ -1,19 +1,33 @@
 /**
  * Application Startup Script
  * Initializes all services when the backend starts
+ * IMPORTANT: This should only run in Node.js runtime, not Edge Runtime
  */
 
-import {
-  initializeServices,
-  shutdownServices,
-} from "./services/serviceManager";
+// Only import services if we're in Node.js runtime (not Edge Runtime)
+let serviceManagerModule = null;
+
+async function getServiceManager() {
+  if (!serviceManagerModule) {
+    // Dynamic import to prevent Edge Runtime bundling issues
+    serviceManagerModule = await import("./services/serviceManager.js");
+  }
+  return serviceManagerModule;
+}
 
 let initialized = false;
 
 /**
  * Initialize application on startup
+ * This should only be called from Node.js runtime contexts (API routes, server components)
  */
 export async function initializeApp() {
+  // Check if we're in Edge Runtime - if so, skip initialization
+  if (typeof EdgeRuntime !== "undefined") {
+    console.log("[Startup] Skipping initialization in Edge Runtime");
+    return;
+  }
+
   if (initialized) {
     console.log("[Startup] Application already initialized");
     return;
@@ -26,6 +40,8 @@ export async function initializeApp() {
   try {
     // Initialize all background services
     console.log("[Startup] Initializing background services...");
+
+    const { initializeServices } = await getServiceManager();
     await initializeServices();
 
     initialized = true;
@@ -62,6 +78,11 @@ export async function initializeApp() {
  * Cleanup on application shutdown
  */
 export async function cleanupApp() {
+  // Check if we're in Edge Runtime
+  if (typeof EdgeRuntime !== "undefined") {
+    return;
+  }
+
   if (!initialized) {
     return;
   }
@@ -71,6 +92,7 @@ export async function cleanupApp() {
   console.log("=".repeat(60) + "\n");
 
   try {
+    const { shutdownServices } = await getServiceManager();
     await shutdownServices();
     initialized = false;
 

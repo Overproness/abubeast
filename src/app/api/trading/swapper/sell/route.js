@@ -1,11 +1,12 @@
+export const runtime = "nodejs";
+
 /**
  * Swapper Manual Sell API Route
  * POST /api/trading/swapper/sell - Manual sell using session key (swapper logic)
  */
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { verifyToken } from "@/lib/auth/auth";
 import { SessionBasedAutoSell } from "@/lib/trading/sessionBasedAutoSell";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 /**
@@ -13,10 +14,15 @@ import { NextResponse } from "next/server";
  */
 export async function POST(request) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    // Verify user authentication
+    const token = request.cookies.get("token")?.value;
+    if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const tokenData = await verifyToken(token);
+    if (!tokenData || !tokenData.id) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -35,7 +41,7 @@ export async function POST(request) {
     // Use SessionBasedAutoSell for sell (it handles the sell logic)
     const autoSell = new SessionBasedAutoSell();
     const result = await autoSell.sellTokenForUser({
-      userId: session.user.id,
+      userId: tokenData.id,
       walletAddress,
       tokenMint,
       triggerType: "manual",
