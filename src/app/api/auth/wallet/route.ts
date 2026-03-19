@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { signToken } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/user";
-import { signToken } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {

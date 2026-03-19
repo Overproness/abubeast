@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Settings as SettingsIcon,
   Bell,
-  Shield,
   Globe,
   Save,
+  Settings as SettingsIcon,
+  Shield,
 } from "lucide-react";
+import { useState } from "react";
 
 export default function SettingsPage() {
   const [notifications, setNotifications] = useState(true);
@@ -45,8 +45,12 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white">Push Notifications</p>
-                <p className="text-xs text-slate-500">Receive alerts in your browser</p>
+                <p className="text-sm font-medium text-white">
+                  Push Notifications
+                </p>
+                <p className="text-xs text-slate-500">
+                  Receive alerts in your browser
+                </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -61,7 +65,9 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white">Trade Alerts</p>
-                <p className="text-xs text-slate-500">Get notified on every trade execution</p>
+                <p className="text-xs text-slate-500">
+                  Get notified on every trade execution
+                </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -76,7 +82,9 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white">Price Alerts</p>
-                <p className="text-xs text-slate-500">Alert when tokens hit target prices</p>
+                <p className="text-xs text-slate-500">
+                  Alert when tokens hit target prices
+                </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -131,8 +139,12 @@ export default function SettingsPage() {
             <div className="p-4 rounded-xl bg-white/5 border border-white/5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold text-white">Two-Factor Authentication</p>
-                  <p className="text-xs text-slate-500">Add an extra layer of security</p>
+                  <p className="text-sm font-bold text-white">
+                    Two-Factor Authentication
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Add an extra layer of security
+                  </p>
                 </div>
                 <button className="px-4 py-2 rounded-lg bg-primary text-background-dark text-xs font-bold">
                   Enable
@@ -142,8 +154,12 @@ export default function SettingsPage() {
             <div className="p-4 rounded-xl bg-white/5 border border-white/5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold text-white">Active Sessions</p>
-                  <p className="text-xs text-slate-500">Manage your active login sessions</p>
+                  <p className="text-sm font-bold text-white">
+                    Active Sessions
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Manage your active login sessions
+                  </p>
                 </div>
                 <button className="px-4 py-2 rounded-lg bg-red-500/10 text-red-500 text-xs font-bold border border-red-500/20">
                   Revoke All

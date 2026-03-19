@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { getAuthUser } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import Trade from "@/models/trade";
-import { getAuthUser } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {

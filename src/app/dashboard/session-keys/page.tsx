@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  ShieldCheck,
+  ArrowRight,
+  ArrowRightLeft,
+  Bot,
   Download,
   LinkIcon,
   Lock,
-  ArrowRightLeft,
-  Bot,
-  StopCircle,
-  Rocket,
   Receipt,
-  ArrowRight,
+  Rocket,
+  ShieldCheck,
+  StopCircle,
 } from "lucide-react";
+import { useState } from "react";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -76,8 +76,9 @@ export default function SessionKeysPage() {
             Session &amp; <span className="text-primary">Trading Keys</span>
           </h1>
           <p className="text-slate-400 max-w-xl">
-            Manage automated execution permissions and bot session authorization.
-            Your keys are encrypted using bank-grade hardware security modules.
+            Manage automated execution permissions and bot session
+            authorization. Your keys are encrypted using bank-grade hardware
+            security modules.
           </p>
         </div>
         <div className="flex gap-3">
@@ -115,7 +116,9 @@ export default function SessionKeysPage() {
                   {/* Can Trade */}
                   <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
                     <div>
-                      <p className="text-sm font-bold text-white">Can Trade Assets</p>
+                      <p className="text-sm font-bold text-white">
+                        Can Trade Assets
+                      </p>
                       <p className="text-xs text-slate-500">
                         Allow bot to execute market orders
                       </p>
@@ -134,7 +137,9 @@ export default function SessionKeysPage() {
                   {/* Can Swap */}
                   <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
                     <div>
-                      <p className="text-sm font-bold text-white">Can Swap Tokens</p>
+                      <p className="text-sm font-bold text-white">
+                        Can Swap Tokens
+                      </p>
                       <p className="text-xs text-slate-500">
                         Permission to use DEX aggregators
                       </p>

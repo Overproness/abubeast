@@ -1,18 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import {
-  Bot,
-  Key,
-  TrendingUp,
-  Pause,
-  Settings,
-} from "lucide-react";
-import PortfolioChart from "@/components/dashboard/portfolio-chart";
-import LiveActivity from "@/components/dashboard/live-activity";
 import AIIntelligence from "@/components/dashboard/ai-intelligence";
+import LiveActivity from "@/components/dashboard/live-activity";
+import PortfolioChart from "@/components/dashboard/portfolio-chart";
 import StatusMetrics from "@/components/dashboard/status-metrics";
+import { motion } from "framer-motion";
+import { Bot, Key, Pause, Settings, TrendingUp } from "lucide-react";
+import { useState } from "react";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },

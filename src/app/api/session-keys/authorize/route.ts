@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { PublicKey } from "@solana/web3.js";
-import nacl from "tweetnacl";
+import { getAuthUser } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import SessionKey from "@/models/session-key";
-import { getAuthUser } from "@/lib/auth";
+import { PublicKey } from "@solana/web3.js";
+import { NextRequest, NextResponse } from "next/server";
+import nacl from "tweetnacl";
 
 export async function POST(request: NextRequest) {
   try {

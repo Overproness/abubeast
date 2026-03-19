@@ -2,13 +2,13 @@
 
 import { motion } from "framer-motion";
 import {
-  TrendingUp,
-  Shield,
-  Zap,
   Brain,
-  Lock,
-  Unlock,
   ChevronRight,
+  Lock,
+  Shield,
+  TrendingUp,
+  Unlock,
+  Zap,
 } from "lucide-react";
 
 const STRATEGIES = [
@@ -101,13 +101,17 @@ export default function StrategiesPage() {
             <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/5">
               <div className="flex gap-6">
                 <div>
-                  <p className="text-[10px] text-slate-500 uppercase mb-0.5">Risk</p>
+                  <p className="text-[10px] text-slate-500 uppercase mb-0.5">
+                    Risk
+                  </p>
                   <p className={`text-xs font-bold ${strat.riskColor}`}>
                     {strat.risk}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-500 uppercase mb-0.5">30d PnL</p>
+                  <p className="text-[10px] text-slate-500 uppercase mb-0.5">
+                    30d PnL
+                  </p>
                   <p className="text-xs font-bold text-solana-green font-mono">
                     {strat.pnl}
                   </p>

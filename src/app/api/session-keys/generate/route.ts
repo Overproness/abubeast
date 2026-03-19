@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { Keypair } from "@solana/web3.js";
-import dbConnect from "@/lib/mongodb";
-import SessionKey from "@/models/session-key";
 import { getAuthUser } from "@/lib/auth";
+import dbConnect from "@/lib/mongodb";
 import {
-  encryptSecretKey,
-  generateAuthorizationMessage,
+    encryptSecretKey,
+    generateAuthorizationMessage,
 } from "@/lib/session-keys";
+import SessionKey from "@/models/session-key";
+import { Keypair } from "@solana/web3.js";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {

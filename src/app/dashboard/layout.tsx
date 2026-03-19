@@ -1,8 +1,8 @@
 "use client";
 
-import { WalletProvider } from "@/providers/wallet-provider";
 import DashboardNavbar from "@/components/dashboard-navbar";
 import Footer from "@/components/footer";
+import { WalletProvider } from "@/providers/wallet-provider";
 
 export default function DashboardLayout({
   children,

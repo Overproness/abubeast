@@ -1,16 +1,22 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Terminal as TerminalIcon, Send } from "lucide-react";
+import { Send, Terminal as TerminalIcon } from "lucide-react";
 import { useState } from "react";
 
 export default function TerminalPage() {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState([
-    { type: "system", text: "AbuBeast Terminal v2.1 — Connected to Mainnet-Beta" },
+    {
+      type: "system",
+      text: "AbuBeast Terminal v2.1 — Connected to Mainnet-Beta",
+    },
     { type: "system", text: "Type 'help' for available commands" },
     { type: "input", text: "> status" },
-    { type: "output", text: "Bot Status: ACTIVE | Strategy: MEV Arbitrage V4 | Uptime: 14d 02h" },
+    {
+      type: "output",
+      text: "Bot Status: ACTIVE | Strategy: MEV Arbitrage V4 | Uptime: 14d 02h",
+    },
     { type: "input", text: "> balance" },
     { type: "output", text: "SOL: 142.50 | USDC: 1,248.30 | JUP: 5,420.00" },
   ]);
@@ -64,8 +70,8 @@ export default function TerminalPage() {
                 line.type === "system"
                   ? "text-solana-green"
                   : line.type === "input"
-                  ? "text-primary"
-                  : "text-slate-300"
+                    ? "text-primary"
+                    : "text-slate-300"
               }
             >
               {line.text}

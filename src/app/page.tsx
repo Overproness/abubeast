@@ -1,22 +1,22 @@
 "use client";
 
-import { useRef } from "react";
+import Footer from "@/components/footer";
+import LandingNavbar from "@/components/landing-navbar";
+import { SplinePlaceholder } from "@/components/spline-scene";
 import { motion, useInView } from "framer-motion";
 import {
-  Shield,
-  Zap as ZapIcon,
+  BadgeCheck,
   Brain,
   CheckCircle,
-  Wallet,
-  ExternalLink,
-  BadgeCheck,
-  Globe,
   Code,
+  ExternalLink,
+  Globe,
+  Shield,
+  Wallet,
+  Zap as ZapIcon,
 } from "lucide-react";
 import Link from "next/link";
-import LandingNavbar from "@/components/landing-navbar";
-import Footer from "@/components/footer";
-import { SplinePlaceholder } from "@/components/spline-scene";
+import { useRef } from "react";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -126,7 +126,9 @@ export default function LandingPage() {
                 <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">
                   Avg Finality
                 </p>
-                <p className="font-mono text-xl font-bold text-primary">400ms</p>
+                <p className="font-mono text-xl font-bold text-primary">
+                  400ms
+                </p>
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">
@@ -208,7 +210,8 @@ export default function LandingPage() {
             <h3 className="text-xl font-bold mb-3">Security First</h3>
             <p className="text-slate-400 leading-relaxed text-sm mb-6">
               Military-grade encryption for all private keys. Non-custodial
-              architecture ensures you always retain full control of your assets.
+              architecture ensures you always retain full control of your
+              assets.
             </p>
             <ul className="space-y-2">
               <li className="flex items-center gap-2 text-xs font-mono text-slate-500">

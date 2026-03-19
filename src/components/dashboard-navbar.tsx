@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
-import { Zap, Bell } from "lucide-react";
 import WalletButton from "@/components/wallet-button";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { Bell, Zap } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -48,7 +48,7 @@ export default function DashboardNavbar() {
                   "text-sm font-medium transition-colors relative",
                   isActive
                     ? "text-primary"
-                    : "text-slate-400 hover:text-slate-100"
+                    : "text-slate-400 hover:text-slate-100",
                 )}
               >
                 {link.label === "Security Keys" && isActive && (
@@ -64,7 +64,9 @@ export default function DashboardNavbar() {
       <div className="flex items-center gap-4">
         <div className="hidden lg:flex items-center bg-slate-800/50 rounded-lg px-3 py-1.5 border border-glass-border">
           <span className="size-2 rounded-full bg-solana-green mr-2" />
-          <span className="text-xs font-mono text-slate-300">RPC: Mainnet-Beta</span>
+          <span className="text-xs font-mono text-slate-300">
+            RPC: Mainnet-Beta
+          </span>
         </div>
         <button className="p-2 rounded-lg bg-slate-800/50 text-slate-300 hover:text-primary border border-glass-border transition-colors">
           <Bell className="w-5 h-5" />

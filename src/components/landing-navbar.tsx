@@ -1,12 +1,11 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import { Menu, X, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Menu, X } from "lucide-react";
-import WalletButton from "@/components/wallet-button";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 const LINKS = [
   { href: "#features", label: "Features" },
@@ -37,14 +36,16 @@ export default function LandingNavbar() {
         <nav
           className={cn(
             "max-w-7xl mx-auto rounded-full px-6 py-3 flex items-center justify-between transition-all duration-300",
-            scrolled ? "glass shadow-lg" : "glass"
+            scrolled ? "glass shadow-lg" : "glass",
           )}
         >
           <Link href="/" className="flex items-center gap-2">
             <div className="size-8 bg-gradient-to-br from-primary to-solana-purple rounded flex items-center justify-center">
               <Zap className="w-4 h-4 text-background-dark" />
             </div>
-            <span className="text-xl font-black tracking-tighter uppercase italic">AbuBeast</span>
+            <span className="text-xl font-black tracking-tighter uppercase italic">
+              AbuBeast
+            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8">

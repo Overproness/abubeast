@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Wallet, ChevronDown, X, ExternalLink } from "lucide-react";
-import { useWallet } from "@/providers/wallet-provider";
 import { shortenAddress } from "@/lib/utils";
+import { useWallet } from "@/providers/wallet-provider";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown, ExternalLink, Wallet, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const WALLETS = [
   { id: "phantom", name: "Phantom", icon: "👻", color: "#ab9ff2" },
@@ -13,7 +13,8 @@ const WALLETS = [
 ] as const;
 
 export default function WalletButton() {
-  const { connected, connecting, address, walletType, connect, disconnect } = useWallet();
+  const { connected, connecting, address, walletType, connect, disconnect } =
+    useWallet();
   const [showDropdown, setShowDropdown] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -48,13 +49,17 @@ export default function WalletButton() {
               className="absolute right-0 top-full mt-2 w-64 glass-panel rounded-xl p-4 z-50"
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-slate-500 font-mono">Connected via {walletType}</span>
+                <span className="text-xs text-slate-500 font-mono">
+                  Connected via {walletType}
+                </span>
                 <button onClick={() => setShowDropdown(false)}>
                   <X className="w-3 h-3 text-slate-500" />
                 </button>
               </div>
               <div className="bg-slate-900/50 rounded-lg p-3 mb-3 border border-glass-border">
-                <p className="font-mono text-xs text-slate-300 break-all">{address}</p>
+                <p className="font-mono text-xs text-slate-300 break-all">
+                  {address}
+                </p>
               </div>
               <div className="space-y-2">
                 <a
@@ -66,7 +71,10 @@ export default function WalletButton() {
                   <ExternalLink className="w-3 h-3" /> View on Solscan
                 </a>
                 <button
-                  onClick={() => { disconnect(); setShowDropdown(false); }}
+                  onClick={() => {
+                    disconnect();
+                    setShowDropdown(false);
+                  }}
                   className="w-full py-2 mt-2 bg-red-500/10 text-red-500 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-all"
                 >
                   Disconnect
@@ -97,7 +105,9 @@ export default function WalletButton() {
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
             className="absolute right-0 top-full mt-2 w-72 glass-panel rounded-xl p-4 z-50"
           >
-            <p className="text-xs text-slate-500 mb-3 font-medium">Select a Solana wallet</p>
+            <p className="text-xs text-slate-500 mb-3 font-medium">
+              Select a Solana wallet
+            </p>
             <div className="space-y-2">
               {WALLETS.map((w) => (
                 <button

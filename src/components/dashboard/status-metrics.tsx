@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, Gauge, Wallet, Radio } from "lucide-react";
+import { Gauge, Radio, Shield, Wallet } from "lucide-react";
 
 const METRICS = [
   {

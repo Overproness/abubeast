@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 interface WalletState {
   connected: boolean;
@@ -58,10 +65,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       let address: string | null = null;
 
       if (walletType === "phantom") {
-        const provider = (window as unknown as Record<string, unknown>).solana as {
-          isPhantom?: boolean;
-          connect: () => Promise<{ publicKey: { toString: () => string } }>;
-        } | undefined;
+        const provider = (window as unknown as Record<string, unknown>)
+          .solana as
+          | {
+              isPhantom?: boolean;
+              connect: () => Promise<{ publicKey: { toString: () => string } }>;
+            }
+          | undefined;
 
         if (!provider?.isPhantom) {
           window.open("https://phantom.app/", "_blank");
@@ -71,11 +81,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         const resp = await provider.connect();
         address = resp.publicKey.toString();
       } else if (walletType === "solflare") {
-        const provider = (window as unknown as Record<string, unknown>).solflare as {
-          isSolflare?: boolean;
-          connect: () => Promise<void>;
-          publicKey: { toString: () => string };
-        } | undefined;
+        const provider = (window as unknown as Record<string, unknown>)
+          .solflare as
+          | {
+              isSolflare?: boolean;
+              connect: () => Promise<void>;
+              publicKey: { toString: () => string };
+            }
+          | undefined;
 
         if (!provider?.isSolflare) {
           window.open("https://solflare.com/", "_blank");
@@ -85,10 +98,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         await provider.connect();
         address = provider.publicKey.toString();
       } else if (walletType === "backpack") {
-        const provider = (window as unknown as Record<string, unknown>).backpack as {
-          isBackpack?: boolean;
-          connect: () => Promise<{ publicKey: { toString: () => string } }>;
-        } | undefined;
+        const provider = (window as unknown as Record<string, unknown>)
+          .backpack as
+          | {
+              isBackpack?: boolean;
+              connect: () => Promise<{ publicKey: { toString: () => string } }>;
+            }
+          | undefined;
 
         if (!provider?.isBackpack) {
           window.open("https://www.backpack.app/", "_blank");
@@ -110,7 +126,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         setState(newState);
         localStorage.setItem(
           "abubeast-wallet",
-          JSON.stringify({ connected: true, address, walletType, balance: null })
+          JSON.stringify({
+            connected: true,
+            address,
+            walletType,
+            balance: null,
+          }),
         );
 
         // Authenticate with backend
