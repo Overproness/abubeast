@@ -1,10 +1,18 @@
-import { signToken } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/user";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
+    const authPayload = await getAuthUser();
+    if (!authPayload) {
+      return NextResponse.json(
+        { error: "Must be logged in to connect wallet" },
+        { status: 401 }
+      );
+    }
+
     const { walletAddress, walletType } = await request.json();
 
     if (!walletAddress || typeof walletAddress !== "string") {
@@ -16,45 +24,30 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
-    let user = await User.findOne({ walletAddress });
-
+    const user = await User.findById(authPayload.userId);
     if (!user) {
-      user = await User.create({
-        walletAddress,
-        walletType: walletType || "phantom",
-        lastLoginAt: new Date(),
-      });
-    } else {
-      user.lastLoginAt = new Date();
-      await user.save();
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
     }
 
-    const token = await signToken({
-      userId: user._id.toString(),
-      walletAddress: user.walletAddress,
-    });
+    user.walletAddress = walletAddress;
+    user.walletType = walletType || "phantom";
+    await user.save();
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
       user: {
         id: user._id,
+        email: user.email,
         walletAddress: user.walletAddress,
         walletType: user.walletType,
         settings: user.settings,
       },
     });
-
-    response.cookies.set("auth-token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60,
-      path: "/",
-    });
-
-    return response;
   } catch (error) {
-    console.error("Auth error:", error);
+    console.error("Wallet connect error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

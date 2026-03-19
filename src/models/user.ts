@@ -1,10 +1,11 @@
 import mongoose, { Schema, type Document } from "mongoose";
 
 export interface IUser extends Document {
-  walletAddress: string;
-  walletType: string;
-  displayName?: string;
-  email?: string;
+  email: string;
+  password: string;
+  displayName: string;
+  walletAddress?: string;
+  walletType?: string;
   createdAt: Date;
   updatedAt: Date;
   lastLoginAt: Date;
@@ -18,19 +19,32 @@ export interface IUser extends Document {
 
 const UserSchema = new Schema<IUser>(
   {
-    walletAddress: {
+    email: {
       type: String,
       required: true,
       unique: true,
       index: true,
+      lowercase: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    displayName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    walletAddress: {
+      type: String,
+      sparse: true,
+      index: true,
     },
     walletType: {
       type: String,
-      required: true,
       default: "phantom",
     },
-    displayName: String,
-    email: String,
     lastLoginAt: { type: Date, default: Date.now },
     settings: {
       notifications: { type: Boolean, default: true },

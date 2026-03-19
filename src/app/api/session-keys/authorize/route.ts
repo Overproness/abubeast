@@ -1,5 +1,6 @@
 import { getAuthUser } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
+import User from "@/models/user";
 import SessionKey from "@/models/session-key";
 import { PublicKey } from "@solana/web3.js";
 import { NextRequest, NextResponse } from "next/server";
@@ -7,8 +8,8 @@ import nacl from "tweetnacl";
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getAuthUser();
-    if (!user) {
+    const authUser = await getAuthUser();
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -21,18 +22,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (walletAddress !== user.walletAddress) {
+    await dbConnect();
+
+    const dbUser = await User.findById(authUser.userId).select("walletAddress");
+    if (!dbUser || walletAddress !== dbUser.walletAddress) {
       return NextResponse.json(
         { error: "Wallet address mismatch" },
         { status: 403 }
       );
     }
 
-    await dbConnect();
-
     const sessionKey = await SessionKey.findOne({
       _id: sessionKeyId,
-      userId: user.userId,
+      userId: authUser.userId,
       status: "pending",
     });
 

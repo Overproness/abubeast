@@ -4,8 +4,9 @@ import AIIntelligence from "@/components/dashboard/ai-intelligence";
 import LiveActivity from "@/components/dashboard/live-activity";
 import PortfolioChart from "@/components/dashboard/portfolio-chart";
 import StatusMetrics from "@/components/dashboard/status-metrics";
+import { useWallet } from "@/providers/wallet-provider";
 import { motion } from "framer-motion";
-import { Bot, Key, Pause, Settings, TrendingUp } from "lucide-react";
+import { Bot, Key, Pause, Settings, TrendingUp, Wallet } from "lucide-react";
 import { useState } from "react";
 
 const fadeIn = {
@@ -17,8 +18,50 @@ const fadeIn = {
   }),
 };
 
+function WalletRequiredOverlay() {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 px-6">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="text-center max-w-md"
+      >
+        <div className="size-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center mx-auto mb-6">
+          <Wallet className="w-10 h-10 text-primary" />
+        </div>
+        <h2 className="text-2xl font-black text-white tracking-tight mb-3">
+          Connect Your Wallet
+        </h2>
+        <p className="text-slate-400 text-sm leading-relaxed mb-6">
+          To view your portfolio, trades, and analytics, please connect your
+          Solana wallet using the button in the top navigation bar.
+        </p>
+        <div className="glassmorphism rounded-xl p-4 text-left space-y-3">
+          <div className="flex items-center gap-3 text-sm">
+            <span className="size-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">1</span>
+            <span className="text-slate-300">Click &quot;Connect Wallet&quot; in the top right</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm">
+            <span className="size-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">2</span>
+            <span className="text-slate-300">Select your Solana wallet (Phantom, Solflare, or Backpack)</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm">
+            <span className="size-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">3</span>
+            <span className="text-slate-300">Approve the connection in your wallet</span>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
+  const { connected } = useWallet();
   const [botActive, setBotActive] = useState(true);
+
+  if (!connected) {
+    return <WalletRequiredOverlay />;
+  }
 
   return (
     <div className="p-6 max-w-[1600px] mx-auto w-full">

@@ -24,16 +24,16 @@ export default function Footer({
                 Docs
               </Link>
               <Link
-                href="/api-reference"
-                className="text-xs text-slate-500 hover:text-primary transition-colors"
-              >
-                API
-              </Link>
-              <Link
-                href="/support"
+                href="/contact"
                 className="text-xs text-slate-500 hover:text-primary transition-colors"
               >
                 Support
+              </Link>
+              <Link
+                href="/privacy"
+                className="text-xs text-slate-500 hover:text-primary transition-colors"
+              >
+                Privacy
               </Link>
             </div>
           </div>
@@ -69,22 +69,12 @@ export default function Footer({
           <Link href="/terms" className="hover:text-primary transition-colors">
             Terms of Service
           </Link>
-          <a
-            href="https://twitter.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-primary transition-colors"
-          >
-            Twitter (X)
-          </a>
-          <a
-            href="https://discord.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-primary transition-colors"
-          >
-            Discord
-          </a>
+          <Link href="/contact" className="hover:text-primary transition-colors">
+            Contact Us
+          </Link>
+          <Link href="/docs" className="hover:text-primary transition-colors">
+            Documentation
+          </Link>
         </div>
         <p className="text-slate-600 text-xs font-mono">
           © 2024 AbuBeast Labs. Powered by Solana.

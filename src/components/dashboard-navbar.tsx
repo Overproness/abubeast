@@ -2,8 +2,9 @@
 
 import WalletButton from "@/components/wallet-button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/providers/auth-provider";
 import { motion } from "framer-motion";
-import { Bell, Zap } from "lucide-react";
+import { Bell, LogOut, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -17,6 +18,7 @@ const NAV_LINKS = [
 
 export default function DashboardNavbar() {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   return (
     <motion.header
@@ -72,6 +74,13 @@ export default function DashboardNavbar() {
           <Bell className="w-5 h-5" />
         </button>
         <WalletButton />
+        <button
+          onClick={logout}
+          className="p-2 rounded-lg bg-slate-800/50 text-slate-300 hover:text-red-400 border border-glass-border transition-colors"
+          title="Sign out"
+        >
+          <LogOut className="w-5 h-5" />
+        </button>
       </div>
     </motion.header>
   );

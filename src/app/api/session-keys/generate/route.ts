@@ -1,5 +1,6 @@
 import { getAuthUser } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
+import User from "@/models/user";
 import {
     encryptSecretKey,
     generateAuthorizationMessage,
@@ -10,8 +11,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getAuthUser();
-    if (!user) {
+    const authUser = await getAuthUser();
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -25,7 +26,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (walletAddress !== user.walletAddress) {
+    await dbConnect();
+
+    const dbUser = await User.findById(authUser.userId).select("walletAddress");
+    if (!dbUser || walletAddress !== dbUser.walletAddress) {
       return NextResponse.json(
         { error: "Wallet address mismatch" },
         { status: 403 }
@@ -51,7 +55,7 @@ export async function POST(request: NextRequest) {
     await dbConnect();
 
     const sessionKey = await SessionKey.create({
-      userId: user.userId,
+      userId: authUser.userId,
       walletAddress,
       publicKey,
       encryptedData: encrypted.encryptedData,
