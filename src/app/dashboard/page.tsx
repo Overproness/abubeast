@@ -38,16 +38,28 @@ function WalletRequiredOverlay() {
         </p>
         <div className="glassmorphism rounded-xl p-4 text-left space-y-3">
           <div className="flex items-center gap-3 text-sm">
-            <span className="size-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">1</span>
-            <span className="text-slate-300">Click &quot;Connect Wallet&quot; in the top right</span>
+            <span className="size-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">
+              1
+            </span>
+            <span className="text-slate-300">
+              Click &quot;Connect Wallet&quot; in the top right
+            </span>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="size-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">2</span>
-            <span className="text-slate-300">Select your Solana wallet (Phantom, Solflare, or Backpack)</span>
+            <span className="size-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">
+              2
+            </span>
+            <span className="text-slate-300">
+              Select your Solana wallet (Phantom, Solflare, or Backpack)
+            </span>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="size-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">3</span>
-            <span className="text-slate-300">Approve the connection in your wallet</span>
+            <span className="size-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">
+              3
+            </span>
+            <span className="text-slate-300">
+              Approve the connection in your wallet
+            </span>
           </div>
         </div>
       </motion.div>

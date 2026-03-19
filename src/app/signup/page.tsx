@@ -174,7 +174,7 @@ export default function SignupPage() {
                 "w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all",
                 loading
                   ? "bg-primary/50 text-background-dark/50 cursor-not-allowed"
-                  : "bg-primary text-background-dark hover:opacity-90 glow-cyan"
+                  : "bg-primary text-background-dark hover:opacity-90 glow-cyan",
               )}
             >
               {loading ? (

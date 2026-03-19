@@ -32,7 +32,8 @@ export default function ContactPage() {
             Contact Us
           </h1>
           <p className="text-slate-400 text-lg">
-            Have a question, feedback, or need help? We&apos;d love to hear from you.
+            Have a question, feedback, or need help? We&apos;d love to hear from
+            you.
           </p>
         </motion.div>
 
@@ -51,11 +52,15 @@ export default function ContactPage() {
                   Message Sent!
                 </h2>
                 <p className="text-slate-400">
-                  Thank you for reaching out. We&apos;ll get back to you as soon as possible.
+                  Thank you for reaching out. We&apos;ll get back to you as soon
+                  as possible.
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="glassmorphism rounded-2xl p-8 space-y-5">
+              <form
+                onSubmit={handleSubmit}
+                className="glassmorphism rounded-2xl p-8 space-y-5"
+              >
                 <div>
                   <label className="block text-xs font-bold text-primary uppercase tracking-widest mb-2">
                     Name

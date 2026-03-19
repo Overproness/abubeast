@@ -1,11 +1,11 @@
 import { getAuthUser } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
-import User from "@/models/user";
 import {
     encryptSecretKey,
     generateAuthorizationMessage,
 } from "@/lib/session-keys";
 import SessionKey from "@/models/session-key";
+import User from "@/models/user";
 import { Keypair } from "@solana/web3.js";
 import { NextRequest, NextResponse } from "next/server";
 

@@ -32,11 +32,9 @@ export default function LandingNavbar() {
         className="fixed top-0 left-0 w-full z-50 px-6 py-4"
       >
         <nav
-          className={
-            `max-w-7xl mx-auto rounded-full px-6 py-3 flex items-center justify-between transition-all duration-300 glass ${
-              scrolled ? "shadow-lg" : ""
-            }`
-          }
+          className={`max-w-7xl mx-auto rounded-full px-6 py-3 flex items-center justify-between transition-all duration-300 glass ${
+            scrolled ? "shadow-lg" : ""
+          }`}
         >
           <Link href="/" className="flex items-center gap-2">
             <div className="size-8 bg-gradient-to-br from-primary to-solana-purple rounded flex items-center justify-center">
@@ -65,7 +63,7 @@ export default function LandingNavbar() {
                 >
                   {link.label}
                 </Link>
-              )
+              ),
             )}
           </div>
 
@@ -124,7 +122,7 @@ export default function LandingNavbar() {
                 >
                   {link.label}
                 </Link>
-              )
+              ),
             )}
             <Link
               href="/dashboard"
