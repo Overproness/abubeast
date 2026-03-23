@@ -6,10 +6,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const LINKS = [
-  { href: "#features", label: "Features" },
-  { href: "#security", label: "Security" },
-  { href: "#speed", label: "Speed" },
-  { href: "#roadmap", label: "Roadmap" },
+  { href: "/#features", label: "Features" },
+  { href: "/#security", label: "Security" },
+  { href: "/#speed", label: "Speed" },
+  { href: "/#roadmap", label: "Roadmap" },
   { href: "/docs", label: "Documentation" },
 ];
 
@@ -46,25 +46,15 @@ export default function LandingNavbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            {LINKS.map((link) =>
-              link.href.startsWith("#") ? (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="text-sm font-medium hover:text-primary transition-colors"
-                >
-                  {link.label}
-                </a>
-              ) : (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-sm font-medium hover:text-primary transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ),
-            )}
+            {LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium hover:text-primary transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
 
           <div className="flex items-center gap-4">
@@ -103,27 +93,16 @@ export default function LandingNavbar() {
             >
               <X className="w-6 h-6" />
             </button>
-            {LINKS.map((link) =>
-              link.href.startsWith("#") ? (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="text-2xl font-bold hover:text-primary transition-colors"
-                >
-                  {link.label}
-                </a>
-              ) : (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="text-2xl font-bold hover:text-primary transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ),
-            )}
+            {LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className="text-2xl font-bold hover:text-primary transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
             <Link
               href="/dashboard"
               className="bg-primary hover:bg-primary/90 text-background-dark px-8 py-3 rounded-full text-lg font-bold transition-all glow-cyan"

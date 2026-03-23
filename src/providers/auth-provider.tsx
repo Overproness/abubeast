@@ -13,6 +13,7 @@ interface AuthUser {
   id: string;
   email: string;
   displayName: string;
+  onboardingComplete: boolean;
 }
 
 interface AuthContextType {
@@ -20,6 +21,7 @@ interface AuthContextType {
   loading: boolean;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  completeOnboarding: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -27,6 +29,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   logout: async () => {},
   refreshUser: async () => {},
+  completeOnboarding: async () => {},
 });
 
 export function useAuth() {
@@ -66,8 +69,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const completeOnboarding = useCallback(async () => {
+    try {
+      await fetch("/api/auth/onboarding", { method: "POST" });
+      setUser((prev) => prev ? { ...prev, onboardingComplete: true } : null);
+    } catch {
+      // silent
+    }
+  }, []);
+
   return (
-    <AuthContext value={{ user, loading, logout, refreshUser }}>
+    <AuthContext value={{ user, loading, logout, refreshUser, completeOnboarding }}>
       {children}
     </AuthContext>
   );

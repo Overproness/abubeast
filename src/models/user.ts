@@ -9,6 +9,7 @@ export interface IUser extends Document {
   createdAt: Date;
   updatedAt: Date;
   lastLoginAt: Date;
+  onboardingComplete: boolean;
   settings: {
     notifications: boolean;
     autoTrade: boolean;
@@ -46,6 +47,7 @@ const UserSchema = new Schema<IUser>(
       default: "phantom",
     },
     lastLoginAt: { type: Date, default: Date.now },
+    onboardingComplete: { type: Boolean, default: false },
     settings: {
       notifications: { type: Boolean, default: true },
       autoTrade: { type: Boolean, default: false },

@@ -9,21 +9,16 @@ export interface ISessionKey extends Document {
   authTag: string;
   name: string;
   description?: string;
-  status: "pending" | "active" | "expired" | "revoked";
+  status: "pending" | "active" | "revoked";
   permissions: {
     canTrade: boolean;
     canSwap: boolean;
     canStake: boolean;
     canTransfer: boolean;
   };
-  limits: {
-    maxPerTransaction: number;
-    dailySpendingLimit: number;
-    maxSlippage: number;
-  };
   signature?: string;
   authorizationMessage?: string;
-  expiresAt: Date;
+  expiresAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -40,7 +35,7 @@ const SessionKeySchema = new Schema<ISessionKey>(
     description: String,
     status: {
       type: String,
-      enum: ["pending", "active", "expired", "revoked"],
+      enum: ["pending", "active", "revoked"],
       default: "pending",
       index: true,
     },
@@ -50,17 +45,15 @@ const SessionKeySchema = new Schema<ISessionKey>(
       canStake: { type: Boolean, default: false },
       canTransfer: { type: Boolean, default: false },
     },
-    limits: {
-      maxPerTransaction: { type: Number, default: 100 },
-      dailySpendingLimit: { type: Number, default: 25.5 },
-      maxSlippage: { type: Number, default: 0.5 },
-    },
     signature: String,
     authorizationMessage: String,
-    expiresAt: { type: Date, required: true, index: true },
+    expiresAt: { type: Date, required: false, default: null },
   },
   { timestamps: true }
 );
 
-export default mongoose.models.SessionKey ||
-  mongoose.model<ISessionKey>("SessionKey", SessionKeySchema);
+// Force re-register schema during dev hot-reload to pick up schema changes
+if (mongoose.models.SessionKey) {
+  delete mongoose.models.SessionKey;
+}
+export default mongoose.model<ISessionKey>("SessionKey", SessionKeySchema);

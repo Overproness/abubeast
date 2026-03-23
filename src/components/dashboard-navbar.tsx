@@ -10,10 +10,8 @@ import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/dashboard/terminal", label: "Terminal" },
-  { href: "/dashboard/strategies", label: "Strategies" },
-  { href: "/dashboard/session-keys", label: "Security Keys" },
-  { href: "/dashboard/settings", label: "Settings" },
+  { href: "/dashboard/session-keys", label: "Session Keys" },
+  { href: "/dashboard/settings", label: "Settings", tourId: "settings-link" },
 ];
 
 export default function DashboardNavbar() {
@@ -46,6 +44,7 @@ export default function DashboardNavbar() {
               <Link
                 key={link.href}
                 href={link.href}
+                {...(link.tourId ? { "data-tour": link.tourId } : {})}
                 className={cn(
                   "text-sm font-medium transition-colors relative",
                   isActive
@@ -53,7 +52,7 @@ export default function DashboardNavbar() {
                     : "text-slate-400 hover:text-slate-100",
                 )}
               >
-                {link.label === "Security Keys" && isActive && (
+                {link.label === "Session Keys" && isActive && (
                   <span className="absolute -left-3 top-1/2 -translate-y-1/2 size-1.5 rounded-full bg-primary" />
                 )}
                 {link.label}

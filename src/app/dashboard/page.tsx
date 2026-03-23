@@ -6,8 +6,23 @@ import PortfolioChart from "@/components/dashboard/portfolio-chart";
 import StatusMetrics from "@/components/dashboard/status-metrics";
 import { useWallet } from "@/providers/wallet-provider";
 import { motion } from "framer-motion";
-import { Bot, Key, Pause, Settings, TrendingUp, Wallet } from "lucide-react";
-import { useState } from "react";
+import { Bot, Key, Loader2, Pause, Settings, TrendingUp, Wallet } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+interface TradeStats {
+  tradesToday: number;
+  volumeToday: number;
+  pnlToday: string | null;
+  winRate: string | null;
+}
+
+interface SessionKeyInfo {
+  _id: string;
+  publicKey: string;
+  status: string;
+  name: string;
+}
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -70,6 +85,55 @@ function WalletRequiredOverlay() {
 export default function DashboardPage() {
   const { connected } = useWallet();
   const [botActive, setBotActive] = useState(true);
+  const [stats, setStats] = useState<TradeStats | null>(null);
+
+  // Session key stats
+  const [sessionKeys, setSessionKeys] = useState<SessionKeyInfo[]>([]);
+  const [activeKeyBalances, setActiveKeyBalances] = useState<Record<string, number | null>>({});
+  const [loadingKeys, setLoadingKeys] = useState(true);
+
+  const activeKeys = sessionKeys.filter((k) => k.status === "active");
+  const activeKeyCount = activeKeys.length;
+  const totalActiveBalance = Object.values(activeKeyBalances).reduce<number>(
+    (sum, b) => sum + (b ?? 0),
+    0,
+  );
+
+  useEffect(() => {
+    if (!connected) return;
+    fetch("/api/trades/stats")
+      .then((r) => r.json())
+      .then((data) => setStats(data))
+      .catch(console.error);
+  }, [connected]);
+
+  // Fetch session keys
+  useEffect(() => {
+    if (!connected) return;
+    fetch("/api/session-keys")
+      .then((r) => r.json())
+      .then((data) => setSessionKeys(data.sessionKeys ?? []))
+      .catch(console.error)
+      .finally(() => setLoadingKeys(false));
+  }, [connected]);
+
+  // Fetch balances for active keys
+  useEffect(() => {
+    const active = sessionKeys.filter((k) => k.status === "active");
+    if (active.length === 0) return;
+
+    active.forEach(async (key) => {
+      try {
+        const res = await fetch(`/api/wallet/balance?address=${key.publicKey}`);
+        if (res.ok) {
+          const data = await res.json();
+          setActiveKeyBalances((prev) => ({ ...prev, [key.publicKey]: data.balance }));
+        }
+      } catch {
+        setActiveKeyBalances((prev) => ({ ...prev, [key.publicKey]: null }));
+      }
+    });
+  }, [sessionKeys]);
 
   if (!connected) {
     return <WalletRequiredOverlay />;
@@ -85,6 +149,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="glass-panel p-6 rounded-xl relative overflow-hidden group"
+            data-tour="bot-status"
           >
             <div className="absolute -right-16 -top-16 w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-700" />
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
@@ -154,18 +219,38 @@ export default function DashboardPage() {
             {/* Stats Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
               {[
-                { label: "Trades Today", value: "24", color: "text-slate-100" },
+                {
+                  label: "Trades Today",
+                  value: stats ? String(stats.tradesToday) : "—",
+                  color: "text-slate-100",
+                },
                 {
                   label: "Daily Volume",
-                  value: "$12,504",
+                  value: stats
+                    ? stats.volumeToday > 0
+                      ? `$${stats.volumeToday.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
+                      : "$0"
+                    : "—",
                   color: "text-slate-100",
                 },
                 {
                   label: "P&L Today",
-                  value: "+4.20%",
-                  color: "text-solana-green",
+                  value: stats ? (stats.pnlToday ?? "—") : "—",
+                  color: stats?.pnlToday?.startsWith("+")
+                    ? "text-solana-green"
+                    : stats?.pnlToday?.startsWith("-")
+                      ? "text-red-400"
+                      : "text-slate-100",
                 },
-                { label: "Win Rate", value: "78.5%", color: "text-primary" },
+                {
+                  label: "Win Rate",
+                  value: stats
+                    ? stats.winRate
+                      ? `${stats.winRate}%`
+                      : "—"
+                    : "—",
+                  color: "text-primary",
+                },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -192,35 +277,70 @@ export default function DashboardPage() {
 
         {/* Sidebar */}
         <div className="md:col-span-4 flex flex-col gap-6">
-          {/* Session Key Card */}
+          {/* Session Keys Overview */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
             className="glass-panel p-5 rounded-xl"
+            data-tour="session-keys-card"
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-slate-400 flex items-center gap-2">
-                <Key className="w-4 h-4" /> SESSION KEY
+                <Key className="w-4 h-4" /> SESSION KEYS
               </h3>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-solana-purple/20 text-solana-purple uppercase tracking-tight">
-                Active
-              </span>
+              <Link
+                href="/dashboard/session-keys"
+                className="text-[10px] font-bold px-2 py-0.5 rounded bg-primary/20 text-primary uppercase tracking-tight hover:bg-primary/30 transition-colors"
+              >
+                Manage
+              </Link>
             </div>
             <div className="flex flex-col gap-3">
+              {/* Active Keys Count */}
+              <div className="bg-background-dark rounded-lg p-3 border border-glass-border flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-slate-500 mb-0.5">Active Keys</p>
+                  <p className="text-xl font-mono font-bold text-slate-100">
+                    {loadingKeys ? (
+                      <Loader2 className="w-5 h-5 animate-spin text-primary inline" />
+                    ) : (
+                      activeKeyCount
+                    )}
+                  </p>
+                </div>
+                <div className={`size-10 rounded-full flex items-center justify-center ${
+                  activeKeyCount > 0
+                    ? "bg-solana-green/10 border border-solana-green/30"
+                    : "bg-slate-800 border border-glass-border"
+                }`}>
+                  <Key className={`w-5 h-5 ${activeKeyCount > 0 ? "text-solana-green" : "text-slate-500"}`} />
+                </div>
+              </div>
+
+              {/* Total Balance */}
               <div className="bg-background-dark rounded-lg p-3 border border-glass-border flex items-center justify-between">
                 <div>
                   <p className="text-xs text-slate-500 mb-0.5">
-                    Time Remaining
+                    Total Key Balance
                   </p>
-                  <p className="text-xl font-mono font-bold text-slate-100">
-                    04:22:15
+                  <p className="text-xl font-mono font-bold text-primary">
+                    {loadingKeys ? (
+                      <Loader2 className="w-5 h-5 animate-spin text-primary inline" />
+                    ) : activeKeyCount === 0 ? (
+                      "—"
+                    ) : Object.keys(activeKeyBalances).length < activeKeyCount ? (
+                      <Loader2 className="w-5 h-5 animate-spin text-primary inline" />
+                    ) : (
+                      `${totalActiveBalance.toFixed(4)} SOL`
+                    )}
                   </p>
                 </div>
-                <button className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-all">
-                  REVOKE
-                </button>
+                <div className="size-10 rounded-full flex items-center justify-center bg-primary/10 border border-primary/30">
+                  <Wallet className="w-5 h-5 text-primary" />
+                </div>
               </div>
+
               <p className="text-[10px] text-slate-500 italic">
                 Session keys allow the bot to sign transactions on your behalf
                 without requiring manual approval for each trade.
@@ -232,12 +352,12 @@ export default function DashboardPage() {
           <LiveActivity />
 
           {/* AI Intelligence */}
-          <AIIntelligence />
+          {/* <AIIntelligence /> */}
         </div>
       </div>
 
       {/* Bottom Metrics */}
-      <StatusMetrics />
+      {/* <StatusMetrics /> */}
     </div>
   );
 }

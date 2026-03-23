@@ -1,9 +1,6 @@
 import { getAuthUser } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
-import {
-    encryptSecretKey,
-    generateAuthorizationMessage,
-} from "@/lib/session-keys";
+import { encryptSecretKey, generateAuthorizationMessage } from "@/lib/session-keys";
 import SessionKey from "@/models/session-key";
 import User from "@/models/user";
 import { Keypair } from "@solana/web3.js";
@@ -16,7 +13,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { walletAddress, expirationHours, permissions, name, description } =
+    const { walletAddress, permissions, name, description, expirationHours } =
       await request.json();
 
     if (!walletAddress || typeof walletAddress !== "string") {
@@ -42,14 +39,15 @@ export async function POST(request: NextRequest) {
 
     const encrypted = encryptSecretKey(secretKey);
 
-    const expiresAt = new Date(
-      Date.now() + (expirationHours || 24) * 60 * 60 * 1000
-    );
+    const expiresAt =
+      expirationHours && typeof expirationHours === "number"
+        ? new Date(Date.now() + expirationHours * 60 * 60 * 1000)
+        : undefined;
 
     const message = generateAuthorizationMessage(
       publicKey,
-      expiresAt,
-      permissions || { canTrade: true, canSwap: true }
+      permissions || { canTrade: true, canSwap: true },
+      expiresAt
     );
 
     await dbConnect();
@@ -64,19 +62,14 @@ export async function POST(request: NextRequest) {
       name: name || "Trading Session",
       description,
       status: "pending",
+      expiresAt: expiresAt ?? null,
       permissions: {
         canTrade: permissions?.canTrade ?? true,
         canSwap: permissions?.canSwap ?? true,
         canStake: permissions?.canStake ?? false,
         canTransfer: permissions?.canTransfer ?? false,
       },
-      limits: {
-        maxPerTransaction: permissions?.maxPerTransaction ?? 100,
-        dailySpendingLimit: permissions?.dailySpendingLimit ?? 25.5,
-        maxSlippage: permissions?.maxSlippage ?? 0.5,
-      },
       authorizationMessage: message,
-      expiresAt,
     });
 
     return NextResponse.json({
@@ -84,7 +77,6 @@ export async function POST(request: NextRequest) {
       sessionKey: {
         id: sessionKey._id,
         publicKey,
-        expiresAt,
         permissions: sessionKey.permissions,
         message,
       },

@@ -33,7 +33,7 @@ const METRICS = [
 export default function StatusMetrics() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
-      {METRICS.map((metric, i) => (
+      {/* {METRICS.map((metric, i) => (
         <motion.div
           key={metric.label}
           initial={{ opacity: 0, y: 20 }}
@@ -53,7 +53,7 @@ export default function StatusMetrics() {
             </p>
           </div>
         </motion.div>
-      ))}
+      ))} */}
     </div>
   );
 }

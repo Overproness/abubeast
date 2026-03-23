@@ -23,6 +23,7 @@ export async function GET() {
         displayName: user.displayName,
         walletAddress: user.walletAddress || null,
         walletType: user.walletType || null,
+        onboardingComplete: user.onboardingComplete ?? false,
         settings: user.settings,
       },
     });

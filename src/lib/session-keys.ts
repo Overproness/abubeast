@@ -1,6 +1,10 @@
 import crypto from "crypto";
 
-const MASTER_PASSWORD = process.env.SESSION_KEY_MASTER_PASSWORD || "default-master-password-change-in-production";
+function getMasterPassword(): string {
+  const pwd = process.env.SESSION_KEY_MASTER_PASSWORD;
+  if (!pwd) throw new Error("SESSION_KEY_MASTER_PASSWORD environment variable is not set");
+  return pwd;
+}
 
 export interface EncryptedKey {
   encryptedData: string;
@@ -9,7 +13,7 @@ export interface EncryptedKey {
 }
 
 export function encryptSecretKey(secretKey: Uint8Array): EncryptedKey {
-  const key = crypto.scryptSync(MASTER_PASSWORD, "salt", 32);
+  const key = crypto.scryptSync(getMasterPassword(), "salt", 32);
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
 
@@ -26,7 +30,7 @@ export function encryptSecretKey(secretKey: Uint8Array): EncryptedKey {
 }
 
 export function decryptSecretKey(encrypted: EncryptedKey): Uint8Array {
-  const key = crypto.scryptSync(MASTER_PASSWORD, "salt", 32);
+  const key = crypto.scryptSync(getMasterPassword(), "salt", 32);
   const decipher = crypto.createDecipheriv(
     "aes-256-gcm",
     key,
@@ -44,8 +48,8 @@ export function decryptSecretKey(encrypted: EncryptedKey): Uint8Array {
 
 export function generateAuthorizationMessage(
   publicKey: string,
-  expiresAt: Date,
-  permissions: Record<string, boolean>
+  permissions: Record<string, boolean>,
+  expiresAt?: Date
 ): string {
   const permList = Object.entries(permissions)
     .filter(([, v]) => v)
@@ -56,7 +60,7 @@ export function generateAuthorizationMessage(
     "AbuBeast Trading Bot Authorization",
     "",
     `Session Key: ${publicKey}`,
-    `Expires: ${expiresAt.toISOString()}`,
+    `Expires: ${expiresAt ? expiresAt.toISOString() : "Never (Unlimited)"}`,
     `Permissions: ${permList}`,
     "",
     "By signing this message, you authorize the above session key to execute trades on your behalf within the specified limits.",

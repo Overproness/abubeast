@@ -1,7 +1,8 @@
 "use client";
 
+import { useWallet } from "@/providers/wallet-provider";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -12,46 +13,35 @@ import {
   YAxis,
 } from "recharts";
 
-const DATA_1D = [
-  { time: "00:00", value: 120 },
-  { time: "03:00", value: 125 },
-  { time: "06:00", value: 118 },
-  { time: "09:00", value: 130 },
-  { time: "12:00", value: 138 },
-  { time: "15:00", value: 135 },
-  { time: "18:00", value: 140 },
-  { time: "19:00", value: 142 },
-  { time: "20:00", value: 141 },
-  { time: "21:00", value: 142.5 },
-];
-
-const DATA_1W = [
-  { time: "Mon", value: 110 },
-  { time: "Tue", value: 118 },
-  { time: "Wed", value: 125 },
-  { time: "Thu", value: 120 },
-  { time: "Fri", value: 135 },
-  { time: "Sat", value: 138 },
-  { time: "Sun", value: 142.5 },
-];
-
-const DATA_1M = [
-  { time: "Week 1", value: 90 },
-  { time: "Week 2", value: 105 },
-  { time: "Week 3", value: 115 },
-  { time: "Week 4", value: 142.5 },
-];
-
 type Period = "1D" | "1W" | "1M";
 
 export default function PortfolioChart() {
+  const { balance, refreshBalance } = useWallet();
   const [period, setPeriod] = useState<Period>("1D");
+  const [solPrice, setSolPrice] = useState<number | null>(null);
 
-  const dataMap: Record<Period, typeof DATA_1D> = {
-    "1D": DATA_1D,
-    "1W": DATA_1W,
-    "1M": DATA_1M,
-  };
+  useEffect(() => {
+    refreshBalance();
+    fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd",
+    )
+      .then((r) => r.json())
+      .then((data) => setSolPrice(data?.solana?.usd ?? null))
+      .catch(() => {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Chart data: a single current-balance point per period until bot trading history exists
+  const chartData =
+    balance != null && balance > 0 ? [{ time: "Now", value: balance }] : [];
+
+  const usdValue =
+    balance != null && solPrice != null
+      ? (balance * solPrice).toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 2,
+        })
+      : null;
 
   return (
     <motion.div
@@ -59,6 +49,7 @@ export default function PortfolioChart() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.15 }}
       className="glass-panel p-6 rounded-xl"
+      data-tour="portfolio-chart"
     >
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -67,11 +58,13 @@ export default function PortfolioChart() {
           </h3>
           <div className="flex items-center gap-4 mt-1">
             <span className="text-3xl font-mono font-bold text-white tracking-tighter">
-              142.50 SOL
+              {balance != null ? `${balance.toFixed(4)} SOL` : "—"}
             </span>
-            <span className="text-solana-green text-sm font-bold bg-solana-green/10 px-2 py-0.5 rounded">
-              +$842.12 (24h)
-            </span>
+            {usdValue && (
+              <span className="text-solana-green text-sm font-bold bg-solana-green/10 px-2 py-0.5 rounded">
+                ≈ {usdValue}
+              </span>
+            )}
           </div>
         </div>
         <div className="flex gap-2">
@@ -92,49 +85,59 @@ export default function PortfolioChart() {
       </div>
 
       <div className="h-64 w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={dataMap[period]} barCategoryGap="20%">
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.05)"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="time"
-              tick={{ fill: "#64748b", fontSize: 10 }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fill: "#64748b", fontSize: 10 }}
-              axisLine={false}
-              tickLine={false}
-              domain={["dataMin - 10", "dataMax + 5"]}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "rgba(15, 34, 35, 0.9)",
-                border: "1px solid rgba(0, 242, 255, 0.2)",
-                borderRadius: "8px",
-                color: "#e2e8f0",
-                fontSize: "12px",
-              }}
-              cursor={{ fill: "rgba(0, 242, 255, 0.05)" }}
-              formatter={(value) => [`${value} SOL`, "Balance"]}
-            />
-            <Bar
-              dataKey="value"
-              fill="url(#barGradient)"
-              radius={[4, 4, 0, 0]}
-            />
-            <defs>
-              <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#14f195" stopOpacity={0.6} />
-                <stop offset="100%" stopColor="#00f2ff" stopOpacity={0.2} />
-              </linearGradient>
-            </defs>
-          </BarChart>
-        </ResponsiveContainer>
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={256}>
+            <BarChart data={chartData} barCategoryGap="20%">
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="rgba(255,255,255,0.05)"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="time"
+                tick={{ fill: "#64748b", fontSize: 10 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fill: "#64748b", fontSize: 10 }}
+                axisLine={false}
+                tickLine={false}
+                domain={["dataMin - 1", "dataMax + 1"]}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "rgba(15, 34, 35, 0.9)",
+                  border: "1px solid rgba(0, 242, 255, 0.2)",
+                  borderRadius: "8px",
+                  color: "#e2e8f0",
+                  fontSize: "12px",
+                }}
+                cursor={{ fill: "rgba(0, 242, 255, 0.05)" }}
+                formatter={(value) => [`${value} SOL`, "Balance"]}
+              />
+              <Bar
+                dataKey="value"
+                fill="url(#barGradient)"
+                radius={[4, 4, 0, 0]}
+              />
+              <defs>
+                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#14f195" stopOpacity={0.6} />
+                  <stop offset="100%" stopColor="#00f2ff" stopOpacity={0.2} />
+                </linearGradient>
+              </defs>
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center gap-2 border border-dashed border-slate-800 rounded-lg">
+            <p className="text-slate-500 text-sm">No chart data yet</p>
+            <p className="text-slate-600 text-xs text-center max-w-xs">
+              Historical performance charts will populate once the trading bot
+              begins executing orders
+            </p>
+          </div>
+        )}
       </div>
     </motion.div>
   );

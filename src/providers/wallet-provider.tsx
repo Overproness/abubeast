@@ -20,6 +20,7 @@ interface WalletState {
 interface WalletContextType extends WalletState {
   connect: (walletType?: string) => Promise<void>;
   disconnect: () => void;
+  refreshBalance: () => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType>({
@@ -30,6 +31,7 @@ const WalletContext = createContext<WalletContextType>({
   balance: null,
   connect: async () => {},
   disconnect: () => {},
+  refreshBalance: async () => {},
 });
 
 export function useWallet() {
@@ -52,11 +54,34 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       try {
         const data = JSON.parse(saved);
         setState((s) => ({ ...s, ...data, connecting: false }));
+        // Refresh on-chain balance after restoring session
+        if (data.address) {
+          fetchOnChainBalance(data.address);
+        }
       } catch {
         localStorage.removeItem("abubeast-wallet");
       }
     }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchOnChainBalance = useCallback(async (walletAddress: string) => {
+    try {
+      const res = await fetch(
+        `/api/wallet/balance?address=${encodeURIComponent(walletAddress)}`,
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const { balance } = await res.json();
+      setState((s) => ({ ...s, balance }));
+    } catch (err) {
+      console.error("Balance fetch error:", err);
+    }
   }, []);
+
+  const refreshBalance = useCallback(async () => {
+    if (state.address) {
+      await fetchOnChainBalance(state.address);
+    }
+  }, [state.address, fetchOnChainBalance]);
 
   const connect = useCallback(async (walletType: string = "phantom") => {
     setState((s) => ({ ...s, connecting: true }));
@@ -134,6 +159,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           }),
         );
 
+        // Fetch on-chain SOL balance
+        fetchOnChainBalance(address);
+
         // Authenticate with backend
         try {
           const res = await fetch("/api/auth/wallet", {
@@ -164,7 +192,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <WalletContext value={{ ...state, connect, disconnect }}>
+    <WalletContext value={{ ...state, connect, disconnect, refreshBalance }}>
       {children}
     </WalletContext>
   );
