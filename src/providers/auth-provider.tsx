@@ -72,14 +72,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const completeOnboarding = useCallback(async () => {
     try {
       await fetch("/api/auth/onboarding", { method: "POST" });
-      setUser((prev) => prev ? { ...prev, onboardingComplete: true } : null);
+      setUser((prev) => (prev ? { ...prev, onboardingComplete: true } : null));
     } catch {
       // silent
     }
   }, []);
 
   return (
-    <AuthContext value={{ user, loading, logout, refreshUser, completeOnboarding }}>
+    <AuthContext
+      value={{ user, loading, logout, refreshUser, completeOnboarding }}
+    >
       {children}
     </AuthContext>
   );

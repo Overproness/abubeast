@@ -14,8 +14,8 @@ import {
   Check,
   Copy,
   ExternalLink,
-  EyeOff,
   Eye,
+  EyeOff,
   Key,
   Loader2,
   Plus,
@@ -390,7 +390,11 @@ export default function SessionKeysPage() {
             data-tour="new-session-key"
             className="px-6 py-3 rounded-xl bg-primary text-background-dark text-sm font-black transition-all hover:opacity-90 flex items-center gap-2 shadow-lg shadow-primary/20"
           >
-            {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {showForm ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <Plus className="w-4 h-4" />
+            )}
             {showForm ? "Cancel" : "New Session Key"}
           </button>
         </div>
@@ -406,7 +410,10 @@ export default function SessionKeysPage() {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden mb-8"
           >
-            <div className="glassmorphism rounded-2xl p-8 border-l-4 border-l-primary" data-tour="session-key-form">
+            <div
+              className="glassmorphism rounded-2xl p-8 border-l-4 border-l-primary"
+              data-tour="session-key-form"
+            >
               <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
                 <Key className="w-5 h-5 text-primary" />
                 Generate New Session Key
@@ -433,7 +440,11 @@ export default function SessionKeysPage() {
                     <select
                       value={formExpiry ?? ""}
                       onChange={(e) =>
-                        setFormExpiry(e.target.value === "" ? null : parseInt(e.target.value))
+                        setFormExpiry(
+                          e.target.value === ""
+                            ? null
+                            : parseInt(e.target.value),
+                        )
                       }
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all appearance-none [&>option]:bg-slate-900 [&>option]:text-white"
                     >
@@ -518,225 +529,230 @@ export default function SessionKeysPage() {
 
       {/* Keys list */}
       <div data-tour="session-keys-area">
-      {loading ? (
-        <div className="flex items-center justify-center py-24">
-          <Loader2 className="w-8 h-8 text-primary animate-spin" />
-        </div>
-      ) : keys.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="glassmorphism rounded-2xl p-16 flex flex-col items-center text-center border border-white/5"
-        >
-          <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 border border-primary/20">
-            <Key className="w-9 h-9 text-primary" />
+        {loading ? (
+          <div className="flex items-center justify-center py-24">
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">
-            No session keys yet
-          </h3>
-          <p className="text-slate-400 text-sm mb-6 max-w-sm">
-            Generate your first session key to let the trading bot execute swaps
-            on your behalf.
-          </p>
-          <button
-            onClick={() => setShowForm(true)}
-            className="px-6 py-3 rounded-xl bg-primary text-background-dark text-sm font-black hover:opacity-90 transition-all flex items-center gap-2"
+        ) : keys.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="glassmorphism rounded-2xl p-16 flex flex-col items-center text-center border border-white/5"
           >
-            <Plus className="w-4 h-4" /> Generate First Key
-          </button>
-        </motion.div>
-      ) : (
-        <div className="space-y-4" data-tour="session-keys-list">
-          {filteredKeys.map((key, i) => (
-            <motion.div
-              key={key._id}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="glassmorphism rounded-2xl border border-white/5 overflow-hidden"
+            <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 border border-primary/20">
+              <Key className="w-9 h-9 text-primary" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">
+              No session keys yet
+            </h3>
+            <p className="text-slate-400 text-sm mb-6 max-w-sm">
+              Generate your first session key to let the trading bot execute
+              swaps on your behalf.
+            </p>
+            <button
+              onClick={() => setShowForm(true)}
+              className="px-6 py-3 rounded-xl bg-primary text-background-dark text-sm font-black hover:opacity-90 transition-all flex items-center gap-2"
             >
-              <div className="p-6 flex flex-col md:flex-row md:items-center gap-4 justify-between">
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <span className="font-bold text-white text-base">
-                      {key.name}
-                    </span>
-                    <StatusBadge status={key.status} />
-                    {key.status === "active" && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border bg-primary/10 text-primary border-primary/20">
-                        <Wallet className="w-3 h-3" />
-                        {balances[key.publicKey] !== undefined
-                          ? balances[key.publicKey] !== null
-                            ? `${balances[key.publicKey]!.toFixed(4)} SOL`
-                            : "— SOL"
-                          : "Loading…"}
+              <Plus className="w-4 h-4" /> Generate First Key
+            </button>
+          </motion.div>
+        ) : (
+          <div className="space-y-4" data-tour="session-keys-list">
+            {filteredKeys.map((key, i) => (
+              <motion.div
+                key={key._id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="glassmorphism rounded-2xl border border-white/5 overflow-hidden"
+              >
+                <div className="p-6 flex flex-col md:flex-row md:items-center gap-4 justify-between">
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <span className="font-bold text-white text-base">
+                        {key.name}
                       </span>
-                    )}
-                  </div>
-
-                  {/* Public key row */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <code className="text-xs font-mono text-slate-300 bg-white/5 px-3 py-1.5 rounded-lg">
-                      {truncatePk(key.publicKey)}
-                    </code>
-                    <button
-                      onClick={() => copyKey(key.publicKey)}
-                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-primary transition-colors"
-                      title="Copy public key"
-                    >
-                      {copiedKey === key.publicKey ? (
-                        <Check className="w-3.5 h-3.5 text-green-400" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
+                      <StatusBadge status={key.status} />
+                      {key.status === "active" && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border bg-primary/10 text-primary border-primary/20">
+                          <Wallet className="w-3 h-3" />
+                          {balances[key.publicKey] !== undefined
+                            ? balances[key.publicKey] !== null
+                              ? `${balances[key.publicKey]!.toFixed(4)} SOL`
+                              : "— SOL"
+                            : "Loading…"}
+                        </span>
                       )}
-                    </button>
-                    <a
-                      href={`https://solscan.io/account/${key.publicKey}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-primary transition-colors"
-                      title="View on Solscan"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
+                    </div>
 
-                  {/* Permissions + expiry */}
-                  <div className="flex items-center flex-wrap gap-2">
-                    {key.permissions.canTrade && (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/20">
-                        Trade
-                      </span>
-                    )}
-                    {key.permissions.canSwap && (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/20">
-                        Swap
-                      </span>
-                    )}
-                    <span className="text-[11px] text-slate-500 ml-1">
-                      {key.expiresAt
-                        ? `Expires ${new Date(key.expiresAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}`
-                        : "Never expires"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                {isActionable(key.status) && (
-                  <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                    {key.status === "pending" && (
+                    {/* Public key row */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <code className="text-xs font-mono text-slate-300 bg-white/5 px-3 py-1.5 rounded-lg">
+                        {truncatePk(key.publicKey)}
+                      </code>
                       <button
-                        onClick={() => handleAuthorize(key)}
-                        disabled={!!actionLoading[key._id] || !connected}
-                        {...(i === 0 ? { "data-tour": "key-authorize" } : {})}
-                        className="px-4 py-2 rounded-xl bg-primary text-background-dark text-xs font-black transition-all hover:opacity-90 disabled:opacity-40 flex items-center gap-1.5"
+                        onClick={() => copyKey(key.publicKey)}
+                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-primary transition-colors"
+                        title="Copy public key"
                       >
-                        {actionLoading[key._id] === "authorizing" ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        {copiedKey === key.publicKey ? (
+                          <Check className="w-3.5 h-3.5 text-green-400" />
                         ) : (
-                          <ArrowRight className="w-3.5 h-3.5" />
+                          <Copy className="w-3.5 h-3.5" />
                         )}
-                        Authorize
                       </button>
-                    )}
-                    {key.status === "active" && (
-                      <button
-                        onClick={() => {
-                          setFundingKeyId(
-                            fundingKeyId === key._id ? null : key._id,
-                          );
-                          setFundAmount("0.01");
-                        }}
-                        disabled={!!actionLoading[key._id] || !connected}
-                        {...(i === 0 ? { "data-tour": "key-fund" } : {})}
-                        className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all disabled:opacity-40 flex items-center gap-1.5 border border-white/10"
+                      <a
+                        href={`https://solscan.io/account/${key.publicKey}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-primary transition-colors"
+                        title="View on Solscan"
                       >
-                        <Wallet className="w-3.5 h-3.5" />
-                        Fund
-                      </button>
-                    )}
-                    <button
-                      onClick={() => handleRevoke(key)}
-                      disabled={!!actionLoading[key._id]}
-                      {...(i === 0 ? { "data-tour": "key-revoke" } : {})}
-                      className="px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold transition-all disabled:opacity-40 flex items-center gap-1.5 border border-red-500/20"
-                    >
-                      {actionLoading[key._id] === "revoking" ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-3.5 h-3.5" />
-                      )}
-                      Revoke
-                    </button>
-                  </div>
-                )}
-              </div>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
 
-              {/* Fund inline panel */}
-              <AnimatePresence>
-                {fundingKeyId === key._id && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="px-6 pb-6 border-t border-white/5 pt-5" {...(i === 0 ? { "data-tour": "key-fund-panel" } : {})}>
-                      <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">
-                        Fund Session Key
-                      </p>
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={fundAmount}
-                            onChange={(e) => {
-                              if (/^\d*\.?\d*$/.test(e.target.value))
-                                setFundAmount(e.target.value);
-                            }}
-                            placeholder="0.01"
-                            className="w-36 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white font-mono text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none pr-12"
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-mono">
-                            SOL
-                          </span>
-                        </div>
+                    {/* Permissions + expiry */}
+                    <div className="flex items-center flex-wrap gap-2">
+                      {key.permissions.canTrade && (
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/20">
+                          Trade
+                        </span>
+                      )}
+                      {key.permissions.canSwap && (
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/20">
+                          Swap
+                        </span>
+                      )}
+                      <span className="text-[11px] text-slate-500 ml-1">
+                        {key.expiresAt
+                          ? `Expires ${new Date(
+                              key.expiresAt,
+                            ).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}`
+                          : "Never expires"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  {isActionable(key.status) && (
+                    <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                      {key.status === "pending" && (
                         <button
-                          onClick={() => handleFund(key)}
-                          disabled={!!actionLoading[key._id]}
-                          className="px-5 py-2.5 rounded-xl bg-primary text-background-dark text-xs font-black transition-all hover:opacity-90 disabled:opacity-40 flex items-center gap-1.5"
+                          onClick={() => handleAuthorize(key)}
+                          disabled={!!actionLoading[key._id] || !connected}
+                          {...(i === 0 ? { "data-tour": "key-authorize" } : {})}
+                          className="px-4 py-2 rounded-xl bg-primary text-background-dark text-xs font-black transition-all hover:opacity-90 disabled:opacity-40 flex items-center gap-1.5"
                         >
-                          {actionLoading[key._id] === "funding" ? (
+                          {actionLoading[key._id] === "authorizing" ? (
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
                           ) : (
-                            <Wallet className="w-3.5 h-3.5" />
+                            <ArrowRight className="w-3.5 h-3.5" />
                           )}
-                          Send SOL
+                          Authorize
                         </button>
+                      )}
+                      {key.status === "active" && (
                         <button
-                          onClick={() => setFundingKeyId(null)}
-                          className="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-white transition-colors"
+                          onClick={() => {
+                            setFundingKeyId(
+                              fundingKeyId === key._id ? null : key._id,
+                            );
+                            setFundAmount("0.01");
+                          }}
+                          disabled={!!actionLoading[key._id] || !connected}
+                          {...(i === 0 ? { "data-tour": "key-fund" } : {})}
+                          className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all disabled:opacity-40 flex items-center gap-1.5 border border-white/10"
                         >
-                          <X className="w-4 h-4" />
+                          <Wallet className="w-3.5 h-3.5" />
+                          Fund
                         </button>
-                      </div>
-                      <p className="mt-2 text-[11px] text-slate-500">
-                        SOL is sent from your connected wallet to this session
-                        key address to cover transaction fees.
-                      </p>
+                      )}
+                      <button
+                        onClick={() => handleRevoke(key)}
+                        disabled={!!actionLoading[key._id]}
+                        {...(i === 0 ? { "data-tour": "key-revoke" } : {})}
+                        className="px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold transition-all disabled:opacity-40 flex items-center gap-1.5 border border-red-500/20"
+                      >
+                        {actionLoading[key._id] === "revoking" ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
+                        Revoke
+                      </button>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
-        </div>
-      )}
+                  )}
+                </div>
+
+                {/* Fund inline panel */}
+                <AnimatePresence>
+                  {fundingKeyId === key._id && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div
+                        className="px-6 pb-6 border-t border-white/5 pt-5"
+                        {...(i === 0 ? { "data-tour": "key-fund-panel" } : {})}
+                      >
+                        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-3">
+                          Fund Session Key
+                        </p>
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={fundAmount}
+                              onChange={(e) => {
+                                if (/^\d*\.?\d*$/.test(e.target.value))
+                                  setFundAmount(e.target.value);
+                              }}
+                              placeholder="0.01"
+                              className="w-36 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white font-mono text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none pr-12"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-mono">
+                              SOL
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => handleFund(key)}
+                            disabled={!!actionLoading[key._id]}
+                            className="px-5 py-2.5 rounded-xl bg-primary text-background-dark text-xs font-black transition-all hover:opacity-90 disabled:opacity-40 flex items-center gap-1.5"
+                          >
+                            {actionLoading[key._id] === "funding" ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Wallet className="w-3.5 h-3.5" />
+                            )}
+                            Send SOL
+                          </button>
+                          <button
+                            onClick={() => setFundingKeyId(null)}
+                            className="p-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-white transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <p className="mt-2 text-[11px] text-slate-500">
+                          SOL is sent from your connected wallet to this session
+                          key address to cover transaction fees.
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

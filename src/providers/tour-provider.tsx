@@ -91,7 +91,7 @@ const ALL_TOUR_STEPS: TourStep[] = [
     target: "[data-tour='session-key-form']",
     title: "Step 2 — Generate the Key",
     content:
-      "Give it a name, pick permissions, and set an expiry. Then click the \"Generate Key\" button inside the form. The tour will automatically continue once it's created.",
+      'Give it a name, pick permissions, and set an expiry. Then click the "Generate Key" button inside the form. The tour will automatically continue once it\'s created.',
     page: "/dashboard/session-keys",
     placement: "bottom",
     waitForAction: true,
@@ -102,7 +102,7 @@ const ALL_TOUR_STEPS: TourStep[] = [
     target: "[data-tour='key-authorize']",
     title: "Step 3 — Authorize the Key",
     content:
-      "Your key is Pending. Click the \"Authorize\" button and sign the message in your wallet. This activates the key so the bot can trade on your behalf.",
+      'Your key is Pending. Click the "Authorize" button and sign the message in your wallet. This activates the key so the bot can trade on your behalf.',
     page: "/dashboard/session-keys",
     placement: "right",
     waitForAction: true,
@@ -113,7 +113,7 @@ const ALL_TOUR_STEPS: TourStep[] = [
     target: "[data-tour='key-fund']",
     title: "Step 4 — Fund the Key",
     content:
-      "Active keys need SOL to pay for transaction fees. Click \"Fund\", enter an amount (0.01 SOL is plenty to start), and confirm in your wallet.",
+      'Active keys need SOL to pay for transaction fees. Click "Fund", enter an amount (0.01 SOL is plenty to start), and confirm in your wallet.',
     page: "/dashboard/session-keys",
     placement: "right",
     waitForAction: true,
@@ -124,7 +124,7 @@ const ALL_TOUR_STEPS: TourStep[] = [
     target: "[data-tour='key-fund-panel']",
     title: "Step 4 — Send SOL",
     content:
-      "Enter an amount and click \"Send SOL\". The tour will move on once the transaction is sent.",
+      'Enter an amount and click "Send SOL". The tour will move on once the transaction is sent.',
     page: "/dashboard/session-keys",
     placement: "top",
     waitForAction: true,
@@ -135,7 +135,7 @@ const ALL_TOUR_STEPS: TourStep[] = [
     target: "[data-tour='key-revoke']",
     title: "Step 5 — Revoke a Key",
     content:
-      "When you no longer need a key, click \"Revoke\". The bot will drain any remaining SOL back to your wallet and destroy the key. Try it now!",
+      'When you no longer need a key, click "Revoke". The bot will drain any remaining SOL back to your wallet and destroy the key. Try it now!',
     page: "/dashboard/session-keys",
     placement: "right",
     waitForAction: true,
@@ -272,7 +272,7 @@ export function TourProvider({ children }: { children: ReactNode }) {
     }
   }, [currentStep, steps, pathname, router]);
 
-  const currentStepData = isActive ? steps[currentStep] ?? null : null;
+  const currentStepData = isActive ? (steps[currentStep] ?? null) : null;
 
   return (
     <TourContext

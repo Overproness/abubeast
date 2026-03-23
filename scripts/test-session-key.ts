@@ -24,13 +24,13 @@
  *   MONGODB_URI=... SESSION_KEY_MASTER_PASSWORD=... npx tsx scripts/test-session-key.ts ...
  */
 
-import crypto from "crypto";
-import mongoose from "mongoose";
 import {
   Connection,
   Keypair,
   VersionedTransaction,
 } from "@solana/web3.js";
+import crypto from "crypto";
+import mongoose from "mongoose";
 
 // ─── Env ──────────────────────────────────────────────────────────────────────
 

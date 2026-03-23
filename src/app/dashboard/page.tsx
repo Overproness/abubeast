@@ -1,12 +1,18 @@
 "use client";
 
-import AIIntelligence from "@/components/dashboard/ai-intelligence";
 import LiveActivity from "@/components/dashboard/live-activity";
 import PortfolioChart from "@/components/dashboard/portfolio-chart";
-import StatusMetrics from "@/components/dashboard/status-metrics";
 import { useWallet } from "@/providers/wallet-provider";
 import { motion } from "framer-motion";
-import { Bot, Key, Loader2, Pause, Settings, TrendingUp, Wallet } from "lucide-react";
+import {
+  Bot,
+  Key,
+  Loader2,
+  Pause,
+  Settings,
+  TrendingUp,
+  Wallet,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -89,7 +95,9 @@ export default function DashboardPage() {
 
   // Session key stats
   const [sessionKeys, setSessionKeys] = useState<SessionKeyInfo[]>([]);
-  const [activeKeyBalances, setActiveKeyBalances] = useState<Record<string, number | null>>({});
+  const [activeKeyBalances, setActiveKeyBalances] = useState<
+    Record<string, number | null>
+  >({});
   const [loadingKeys, setLoadingKeys] = useState(true);
 
   const activeKeys = sessionKeys.filter((k) => k.status === "active");
@@ -127,7 +135,10 @@ export default function DashboardPage() {
         const res = await fetch(`/api/wallet/balance?address=${key.publicKey}`);
         if (res.ok) {
           const data = await res.json();
-          setActiveKeyBalances((prev) => ({ ...prev, [key.publicKey]: data.balance }));
+          setActiveKeyBalances((prev) => ({
+            ...prev,
+            [key.publicKey]: data.balance,
+          }));
         }
       } catch {
         setActiveKeyBalances((prev) => ({ ...prev, [key.publicKey]: null }));
@@ -309,12 +320,16 @@ export default function DashboardPage() {
                     )}
                   </p>
                 </div>
-                <div className={`size-10 rounded-full flex items-center justify-center ${
-                  activeKeyCount > 0
-                    ? "bg-solana-green/10 border border-solana-green/30"
-                    : "bg-slate-800 border border-glass-border"
-                }`}>
-                  <Key className={`w-5 h-5 ${activeKeyCount > 0 ? "text-solana-green" : "text-slate-500"}`} />
+                <div
+                  className={`size-10 rounded-full flex items-center justify-center ${
+                    activeKeyCount > 0
+                      ? "bg-solana-green/10 border border-solana-green/30"
+                      : "bg-slate-800 border border-glass-border"
+                  }`}
+                >
+                  <Key
+                    className={`w-5 h-5 ${activeKeyCount > 0 ? "text-solana-green" : "text-slate-500"}`}
+                  />
                 </div>
               </div>
 
@@ -329,7 +344,8 @@ export default function DashboardPage() {
                       <Loader2 className="w-5 h-5 animate-spin text-primary inline" />
                     ) : activeKeyCount === 0 ? (
                       "—"
-                    ) : Object.keys(activeKeyBalances).length < activeKeyCount ? (
+                    ) : Object.keys(activeKeyBalances).length <
+                      activeKeyCount ? (
                       <Loader2 className="w-5 h-5 animate-spin text-primary inline" />
                     ) : (
                       `${totalActiveBalance.toFixed(4)} SOL`
