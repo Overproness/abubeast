@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       name: name || "Trading Session",
       description,
       status: "pending",
-      expiresAt: expiresAt ?? null,
+      expiresAt,
       permissions: {
         canTrade: permissions?.canTrade ?? true,
         canSwap: permissions?.canSwap ?? true,
